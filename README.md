@@ -1,0 +1,2 @@
+# gogomanager
+Manager manages users
