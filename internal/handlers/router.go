@@ -6,8 +6,6 @@ import (
 	duckRepository "github.com/fatjan/gogomanager/internal/repositories/duck"
 	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
 	duckUseCase "github.com/fatjan/gogomanager/internal/useCases/duck"
-	departmentRepository "github.com/fatjan/gogomanager/internal/repositories/department"
-	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
