@@ -19,3 +19,12 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 ```
 goose postgres "postgres://user:password@tcp(localhost:5432)/dbname" up
 ```
+
+### Linter
+```
+golangci-lint run
+```
+or
+```
+golangci-lint run path/to/your/file.go
+```
