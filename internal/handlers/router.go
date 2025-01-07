@@ -4,6 +4,8 @@ import (
 	"github.com/fatjan/gogomanager/internal/config"
 	duckRepository "github.com/fatjan/gogomanager/internal/repositories/duck"
 	duckUseCase "github.com/fatjan/gogomanager/internal/useCases/duck"
+	departmentRepository "github.com/fatjan/gogomanager/internal/repositories/department"
+	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
@@ -17,4 +19,11 @@ func SetupRouter(cfg *config.Config, db *sqlx.DB, r *gin.Engine) {
 	duckRouter := v1.Group("ducks")
 	duckRouter.GET("/", duckHandler.Index)
 	duckRouter.GET("/:id", duckHandler.Detail)
+
+	departmentRepository := departmentRepository.NewdepartmentRepository(db)
+	departmentUseCase := departmentUseCase.NewUseCase(departmentRepository)
+	departmentHandler := NewdepartmentHandler(departmentUseCase)
+
+	duckRouter := v1.Group("department")
+	duckRouter.POST("/", departmentHandler.Index)
 }
