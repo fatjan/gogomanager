@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"time"
+	"log"
 
 	"github.com/fatjan/gogomanager/internal/config"
 	"github.com/jmoiron/sqlx"

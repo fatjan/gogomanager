@@ -8,15 +8,14 @@ import (
 )
 
 type DepartmentHandler interface {
-	Index(ginCtx *gin.Context)
-	Detail(ginCtx *gin.Context)
+	Post(ginCtx *gin.Context)
 }
 
 type departmentHandler struct {
 	departmentUseCase department.UseCase
 }
 
-func (r *departmentHandler) Index(ginCtx *gin.Context) {
+func (r *departmentHandler) Post(ginCtx *gin.Context) {
 	var departmentRequest dto.DepartmentRequest
 	if err := ginCtx.BindJSON(&departmentRequest); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
@@ -30,10 +29,6 @@ func (r *departmentHandler) Index(ginCtx *gin.Context) {
 	}
 
 	ginCtx.JSON(http.StatusOK, departmentResponse)
-}
-
-func (r *departmentHandler) Detail(ginCtx *gin.Context) {
-	ginCtx.JSON(http.StatusOK, nil)
 }
 
 func NewDepartmentHandler(departmentUseCase department.UseCase) DepartmentHandler {

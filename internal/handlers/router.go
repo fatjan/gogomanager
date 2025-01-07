@@ -25,5 +25,5 @@ func SetupRouter(cfg *config.Config, db *sqlx.DB, r *gin.Engine) {
 	departmentHandler := NewDepartmentHandler(departmentUseCase)
 
 	departmentRouter := v1.Group("department")
-	departmentRouter.POST("/", departmentHandler.Index)
+	departmentRouter.POST("/", departmentHandler.Post)
 }
