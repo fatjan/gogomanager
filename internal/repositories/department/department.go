@@ -1,7 +1,6 @@
 package department
 
 import (
-	"errors"
 	"fmt"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
