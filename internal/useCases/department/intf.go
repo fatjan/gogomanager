@@ -1,10 +1,9 @@
 package department 
 
 import (
-	"github.com/fatjan/gogomanager/internal/dto/department"
+	"github.com/fatjan/gogomanager/internal/dto"
 )
 
 type UseCase interface {
-	GetDepartment() (*dto.GetDepartmentResponse, error)
-	PostDepartment() (*dto.PostDepartmentRequest. error)
+	PostDepartment(*dto.DepartmentRequest) (*dto.DepartmentResponse, error)
 }

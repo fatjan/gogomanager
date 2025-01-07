@@ -20,10 +20,10 @@ func SetupRouter(cfg *config.Config, db *sqlx.DB, r *gin.Engine) {
 	duckRouter.GET("/", duckHandler.Index)
 	duckRouter.GET("/:id", duckHandler.Detail)
 
-	departmentRepository := departmentRepository.NewdepartmentRepository(db)
+	departmentRepository := departmentRepository.NewDepartmentRepository(db)
 	departmentUseCase := departmentUseCase.NewUseCase(departmentRepository)
-	departmentHandler := NewdepartmentHandler(departmentUseCase)
+	departmentHandler := NewDepartmentHandler(departmentUseCase)
 
-	duckRouter := v1.Group("department")
-	duckRouter.POST("/", departmentHandler.Index)
+	departmentRouter := v1.Group("department")
+	departmentRouter.POST("/", departmentHandler.Index)
 }
