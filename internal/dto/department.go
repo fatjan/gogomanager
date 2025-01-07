@@ -1,7 +1,7 @@
 package dto
 
 type Department struct {
-	ID   string `json:"id"`
+	ID   int `json:"id"`
     Name string `json:"name"`
 }
 
@@ -10,6 +10,6 @@ type DepartmentRequest struct {
 }
 
 type DepartmentResponse struct {
-    DepartmentID string `json:"departmentId"` 
+    DepartmentID int `json:"departmentId"` 
     Name         string `json:"name"`
 }

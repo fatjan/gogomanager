@@ -13,11 +13,12 @@ func NewDepartmentRepository(db *sqlx.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) Post(department *models.Department) (error) {
-	_, err := r.db.Exec("INSERT INTO departments (name) VALUES ($1)", department.Name)
+func (r *repository) Post(department *models.Department) (int, error) {
+	var newID int
+	err := r.db.QueryRow("INSERT INTO departments (name, manager_id) VALUES ($1, $2) RETURNING id", department.Name, 1).Scan(&newID)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	
-	return nil
+	return newID, nil
 }
