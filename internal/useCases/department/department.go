@@ -2,8 +2,8 @@ package department
 
 import (
 	"github.com/fatjan/gogomanager/internal/dto"
-	"github.com/fatjan/gogomanager/internal/repositories/department"
 	"github.com/fatjan/gogomanager/internal/models"
+	"github.com/fatjan/gogomanager/internal/repositories/department"
 )
 
 type useCase struct {
@@ -24,9 +24,47 @@ func (uc *useCase) PostDepartment(departmentRequest *dto.DepartmentRequest) (*dt
 	}
 
 	departmentResponse := &dto.DepartmentResponse{
-        DepartmentID: departmentId, 
-        Name:         departmentRequest.Name,
-    }
+		DepartmentID: departmentId,
+		Name:         departmentRequest.Name,
+	}
 
 	return departmentResponse, nil
+}
+
+func (uc *useCase) UpdateDepartment(departmentID int, departmentRequest *dto.DepartmentRequest) (*dto.DepartmentResponse, error) {
+	newDepartment := &models.Department{
+		Name: departmentRequest.Name,
+	}
+
+	_, err := uc.departmentRepository.FindOneByID(departmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = uc.departmentRepository.Update(departmentID, newDepartment)
+	if err != nil {
+		return nil, err
+	}
+
+	departmentResponse := &dto.DepartmentResponse{
+		DepartmentID: departmentID,
+		Name:         departmentRequest.Name,
+	}
+
+	return departmentResponse, nil
+}
+
+func (uc *useCase) DeleteDepartment(departmentID int) error {
+
+	_, err := uc.departmentRepository.FindOneByID(departmentID)
+	if err != nil {
+		return err
+	}
+
+	err = uc.departmentRepository.DeleteByID(departmentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

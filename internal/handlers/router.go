@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"github.com/fatjan/gogomanager/internal/config"
+	departmentRepository "github.com/fatjan/gogomanager/internal/repositories/department"
 	duckRepository "github.com/fatjan/gogomanager/internal/repositories/duck"
+	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
 	duckUseCase "github.com/fatjan/gogomanager/internal/useCases/duck"
 	departmentRepository "github.com/fatjan/gogomanager/internal/repositories/department"
 	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
@@ -10,7 +12,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func SetupRouter(cfg *config.Config, db *sqlx.DB, r *gin.Engine) {
+func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
 	duckRepository := duckRepository.NewDuckRepository(db)
 	duckUseCase := duckUseCase.NewUseCase(duckRepository)
 	duckHandler := NewDuckHandler(duckUseCase)
@@ -26,4 +28,6 @@ func SetupRouter(cfg *config.Config, db *sqlx.DB, r *gin.Engine) {
 
 	departmentRouter := v1.Group("department")
 	departmentRouter.POST("/", departmentHandler.Post)
+	departmentRouter.PATCH("/:id", departmentHandler.Update)
+	departmentRouter.DELETE("/:id", departmentHandler.Delete)
 }
