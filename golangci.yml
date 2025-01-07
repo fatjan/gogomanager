@@ -1,0 +1,20 @@
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - staticcheck
+    - unused
+    - deadcode
+
+run:
+  timeout: 2m
+  skip-dirs:
+    - vendor
+  skip-files:
+    - generated_.*\.go
+
+issues:
+  exclude:
+    - "should have comment"
+    - "error return value not checked"

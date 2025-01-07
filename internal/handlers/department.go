@@ -56,7 +56,7 @@ func (r *departmentHandler) Update(ginCtx *gin.Context) {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Println(fmt.Sprintf("department with id %d not found", departmentIDInt))
 			statusRes = http.StatusNotFound
-			errorMessageRes = errors.New(fmt.Sprintf("department with id %d not found", departmentIDInt))
+			errorMessageRes = fmt.Errorf("department with id %d not found", departmentIDInt)
 		}
 
 		ginCtx.JSON(statusRes, gin.H{"error": errorMessageRes.Error()})
@@ -77,7 +77,7 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Println(fmt.Sprintf("department with id %d not found", departmentIDInt))
 			statusRes = http.StatusNotFound
-			errorMessageRes = errors.New(fmt.Sprintf("department with id %d not found", departmentIDInt))
+			errorMessageRes = fmt.Errorf("department with id %d not found", departmentIDInt)
 
 		}
 
