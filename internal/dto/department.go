@@ -11,13 +11,13 @@ type PostDepartmentRequest struct {
     Name string `validate:"required,min=4,max=33"`
 }
 
-type GetDepartmentResponse struct {
+type DepartmentResponse struct {
     DepartmentID int    `json:"departmentId"` 
     Name         string `json:"name"`
 }
 
-func NewGetDepartmentResponse(dept *Department) *GetDepartmentResponse {
-    return &GetDepartmentResponse{
+func GetDepartmentResponse(dept *Department) *DepartmentResponse {
+    return &DepartmentResponse{
         DepartmentID: dept.ID, 
         Name:         dept.Name,
     }
