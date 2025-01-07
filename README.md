@@ -9,5 +9,5 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 2. Going to the folder schema.
 3. Run the command 
 ```
-goose postgres "user:password@tcp(localhost:5432)/dbname" up
+goose postgres "postgres://user:password@tcp(localhost:5432)/dbname" up
 ```
