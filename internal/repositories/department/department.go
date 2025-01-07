@@ -14,7 +14,7 @@ func NewDepartmentRepository(db *sqlx.DB) Repository {
 }
 
 func (r *repository) Post(department *models.Department) (error) {
-	_, err := r.db.Exec("INSERT INTO public.department (id, name) VALUES ($1, $2)", department.ID, department.Name)
+	_, err := r.db.Exec("INSERT INTO departments (name) VALUES ($1)", department.Name)
 	if err != nil {
 		return err
 	}
