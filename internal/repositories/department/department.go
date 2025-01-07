@@ -1,7 +1,6 @@
 package department
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/fatjan/gogomanager/internal/models"
@@ -37,9 +36,7 @@ func (r *repository) FindOneByID(id int) (*models.Department, error) {
 	).Scan(&department.ID, &department.Name)
 
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New(fmt.Sprintf("department with id %d not found", id))
-		}
+
 		return nil, err
 	}
 
@@ -66,6 +63,24 @@ func (r *repository) Update(id int, department *models.Department) error {
 	if rowsAffected == 0 {
 		log.Println("failed update department")
 		return errors.New(fmt.Sprintf("department with id %d not found", id))
+	}
+
+	return nil
+}
+
+func (r *repository) DeleteByID(id int) error {
+	result, err := r.db.Exec("DELETE FROM departments WHERE id = $1", id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		log.Println(fmt.Sprintf("department with id %d not found", id))
+		return err
 	}
 
 	return nil

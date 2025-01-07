@@ -53,3 +53,18 @@ func (uc *useCase) UpdateDepartment(departmentID int, departmentRequest *dto.Dep
 
 	return departmentResponse, nil
 }
+
+func (uc *useCase) DeleteDepartment(departmentID int) error {
+
+	_, err := uc.departmentRepository.FindOneByID(departmentID)
+	if err != nil {
+		return err
+	}
+
+	err = uc.departmentRepository.DeleteByID(departmentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

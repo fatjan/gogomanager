@@ -7,4 +7,5 @@ import (
 type UseCase interface {
 	PostDepartment(*dto.DepartmentRequest) (*dto.DepartmentResponse, error)
 	UpdateDepartment(int, *dto.DepartmentRequest) (*dto.DepartmentResponse, error)
+	DeleteDepartment(int) error
 }

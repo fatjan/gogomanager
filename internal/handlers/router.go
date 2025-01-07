@@ -10,7 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func SetupRouter(cfg *config.Config, db *sqlx.DB, r *gin.Engine) {
+func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
 	duckRepository := duckRepository.NewDuckRepository(db)
 	duckUseCase := duckUseCase.NewUseCase(duckRepository)
 	duckHandler := NewDuckHandler(duckUseCase)
@@ -27,4 +27,5 @@ func SetupRouter(cfg *config.Config, db *sqlx.DB, r *gin.Engine) {
 	departmentRouter := v1.Group("department")
 	departmentRouter.POST("/", departmentHandler.Post)
 	departmentRouter.PATCH("/:id", departmentHandler.Update)
+	departmentRouter.DELETE("/:id", departmentHandler.Delete)
 }
