@@ -18,11 +18,10 @@ func NewEmployeeRepository(db *sqlx.DB) Repository {
 }
 
 func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Employee, error) {
-	log.Printf("repo", employeeRequest)
 	limit := employeeRequest.Limit
 	offset := employeeRequest.Offset
 	
-	baseQuery := fmt.Sprintf("SELECT * FROM employees WHERE 1=1 LIMIT %d OFFSET %d", limit, offset)
+	baseQuery := fmt.Sprintf("SELECT * FROM employees WHERE 1=1")
 	var args []interface{}
 	var argIndex int
 
@@ -33,14 +32,14 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	employeeImageURI := employeeRequest.EmployeeImageURI
 
 	if idNumber != "" {
-		baseQuery += " AND identity_number = $" + strconv.Itoa(argIndex+1)
-		args = append(args, idNumber)
+		baseQuery += " AND identity_number LIKE $" + strconv.Itoa(argIndex+1)
+		args = append(args, "%"+idNumber+"%")
 		argIndex++
 	}
 
 	if name != "" {
-		baseQuery += " AND name = $" + strconv.Itoa(argIndex+1)
-		args = append(args, name)
+		baseQuery += " AND name LIKE $" + strconv.Itoa(argIndex+1)
+		args = append(args, "%"+name+"%")
 		argIndex++
 	}
 
@@ -59,7 +58,11 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	if employeeImageURI != "" {
 		baseQuery += " AND employee_image_uri = $" + strconv.Itoa(argIndex+1)
 		args = append(args, employeeImageURI)
+		argIndex++
 	}
+
+	baseQuery += " LIMIT $" + strconv.Itoa(argIndex+1) + " OFFSET $" + strconv.Itoa(argIndex+2)
+	args = append(args, limit, offset)
 
 	employees := make([]*models.Employee, 0)
 
@@ -73,7 +76,6 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	for rows.Next() {
 		var employee models.Employee
 		err := rows.StructScan(&employee)
-		log.Println(employee)
 		if err != nil {
 			log.Println("error query select")
 			return nil, err
