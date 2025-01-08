@@ -1,7 +1,7 @@
 package department
 
 import (
-	"fmt"
+	"errors"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -31,9 +31,9 @@ func (r *repository) FindOneByID(id int) (*models.Department, error) {
 	department := &models.Department{}
 
 	err := r.db.QueryRow(
-		"SELECT id, name FROM departments WHERE id = $1",
+		"SELECT id, name, manager_id, created_at, updated_at FROM departments WHERE id = $1",
 		id,
-	).Scan(&department.ID, &department.Name)
+	).Scan(&department.ID, &department.Name, &department.ManagerID, &department.CreatedAt, &department.UpdatedAt)
 
 	if err != nil {
 
@@ -62,7 +62,7 @@ func (r *repository) Update(id int, department *models.Department) error {
 	}
 	if rowsAffected == 0 {
 		log.Println("failed update department")
-		return fmt.Errorf("department with id %d not found", id)
+		return errors.New("update query failed")
 	}
 
 	return nil
@@ -79,8 +79,8 @@ func (r *repository) DeleteByID(id int) error {
 		return err
 	}
 	if rowsAffected == 0 {
-		log.Println(fmt.Sprintf("department with id %d not found", id))
-		return err
+		log.Println("deleted query is failed")
+		return errors.New("deleted query failed")
 	}
 
 	return nil

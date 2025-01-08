@@ -4,9 +4,11 @@ import (
 	"github.com/fatjan/gogomanager/internal/config"
 	departmentRepository "github.com/fatjan/gogomanager/internal/repositories/department"
 	duckRepository "github.com/fatjan/gogomanager/internal/repositories/duck"
+	employeeRepository "github.com/fatjan/gogomanager/internal/repositories/employee"
 	userRepository "github.com/fatjan/gogomanager/internal/repositories/user"
 	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
 	duckUseCase "github.com/fatjan/gogomanager/internal/useCases/duck"
+	employeeUseCase "github.com/fatjan/gogomanager/internal/useCases/employee"
 	userUseCase "github.com/fatjan/gogomanager/internal/useCases/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -30,6 +32,13 @@ func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
 	departmentRouter.POST("/", departmentHandler.Post)
 	departmentRouter.PATCH("/:id", departmentHandler.Update)
 	departmentRouter.DELETE("/:id", departmentHandler.Delete)
+
+	employeeRepository := employeeRepository.NewEmployeeRepository(db)
+	employeeUseCase := employeeUseCase.NewUseCase(employeeRepository)
+	employeeHandler := NewEmployeeHandler(employeeUseCase)
+
+	employeeRouter := v1.Group("employee")
+	employeeRouter.GET("/", employeeHandler.Get)
 
 	userRepository := userRepository.NewUserRepository(db)
 	userUseCase := userUseCase.NewUseCase(userRepository)
