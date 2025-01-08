@@ -1,7 +1,6 @@
 package employee
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +9,11 @@ import (
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+)
+
+const (
+	PG_DUPLICATE_ERROR = "23505"
 )
 
 type repository struct {
@@ -82,29 +86,18 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 }
 
 func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
-	var existingEmployee models.Employee
-
-	err := r.db.Get(&existingEmployee, "SELECT * FROM employees WHERE identity_number = $1", employee.IdentityNumber)
-	if err == nil {
-		return nil, errors.New("duplicate identity number")
-	}
-
-	if err != sql.ErrNoRows {
-		return nil, err
-	}
-
 	query := `
-		INSERT INTO employees (
-			identity_number,
-			name,
-			employee_image_uri,
-			gender,
-			department_id,
-			manager_id
-		) VALUES ($1, $2, $3, $4, $5, $6)
+			INSERT INTO employees (
+				identity_number,
+				name,
+				employee_image_uri,
+				gender,
+				department_id,
+				manager_id
+			) VALUES ($1, $2, $3, $4, $5, $6)
 	`
 
-	_, err = r.db.Exec(query,
+	_, err := r.db.Exec(query,
 		employee.IdentityNumber,
 		employee.Name,
 		employee.EmployeeImageURI,
@@ -112,6 +105,15 @@ func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
 		employee.DepartmentID,
 		employee.ManagerID,
 	)
+
+	if err != nil {
+		pqErr, ok := err.(*pq.Error)
+		if ok && pqErr.Code == PG_DUPLICATE_ERROR {
+			return nil, errors.New("duplicate identity number")
+		}
+
+		return nil, err
+	}
 
 	return employee, err
 }
