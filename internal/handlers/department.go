@@ -37,6 +37,7 @@ func (r *departmentHandler) Post(ginCtx *gin.Context) {
 
 	ginCtx.JSON(http.StatusOK, departmentResponse)
 }
+
 func (r *departmentHandler) Update(ginCtx *gin.Context) {
 	var departmentRequest dto.DepartmentRequest
 
@@ -66,6 +67,7 @@ func (r *departmentHandler) Update(ginCtx *gin.Context) {
 
 	ginCtx.JSON(http.StatusOK, departmentResponse)
 }
+
 func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 	departmentID := ginCtx.Param("id")
 

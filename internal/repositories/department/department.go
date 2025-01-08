@@ -1,7 +1,10 @@
 package department
 
 import (
+<<<<<<< HEAD
 	"errors"
+=======
+>>>>>>> refs/remotes/origin/main
 	"fmt"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -20,6 +23,10 @@ func (r *repository) Post(department *models.Department) (int, error) {
 	var newID int
 	err := r.db.QueryRow("INSERT INTO departments (name, manager_id) VALUES ($1, $2) RETURNING id", department.Name, 1).Scan(&newID)
 	if err != nil {
+<<<<<<< HEAD
+=======
+		log.Println("error query")
+>>>>>>> refs/remotes/origin/main
 		return 0, err
 	}
 
@@ -62,7 +69,11 @@ func (r *repository) Update(id int, department *models.Department) error {
 	}
 	if rowsAffected == 0 {
 		log.Println("failed update department")
+<<<<<<< HEAD
 		return errors.New(fmt.Sprintf("department with id %d not found", id))
+=======
+		return fmt.Errorf("department with id %d not found", id)
+>>>>>>> refs/remotes/origin/main
 	}
 
 	return nil
