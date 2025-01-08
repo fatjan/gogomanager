@@ -1,15 +1,17 @@
 package handlers
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/useCases/employee"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type EmployeeHandler interface {
 	Get(ginCtx *gin.Context)
+	Post(ginCtx *gin.Context)
 }
 
 type employeeHandler struct {
@@ -23,7 +25,7 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 		limitInt = 5
 	}
 	if limitInt > 100 {
-		limitInt = 100 
+		limitInt = 100
 	}
 
 	offset := ginCtx.DefaultQuery("offset", "0")
@@ -49,15 +51,35 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 
 	employeeRequest := dto.EmployeeRequest{
 		IdentityNumber: identityNumber,
-		Name: name,
-		Gender: gender,
-		DepartmentID: departmentID,
-		Limit: limitInt,
-		Offset: offsetInt,
+		Name:           name,
+		Gender:         gender,
+		DepartmentID:   departmentID,
+		Limit:          limitInt,
+		Offset:         offsetInt,
 	}
 
 	employeeResponse, err := r.employeeUseCase.GetAllEmployee(&employeeRequest)
 	if err != nil {
+		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, employeeResponse)
+}
+
+func (r *employeeHandler) Post(ginCtx *gin.Context) {
+	var employeeRequest dto.EmployeeRequest
+	if err := ginCtx.BindJSON(&employeeRequest); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	employeeResponse, err := r.employeeUseCase.PostEmployee(&employeeRequest)
+	if err != nil {
+		if err.Error() == "duplicate identity number" {
+			ginCtx.JSON(http.StatusConflict, gin.H{"error": "Duplicate identity number"})
+			return
+		}
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

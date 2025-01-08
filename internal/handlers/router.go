@@ -37,4 +37,5 @@ func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
 
 	employeeRouter := v1.Group("employee")
 	employeeRouter.GET("/", employeeHandler.Get)
+	employeeRouter.POST("/", employeeHandler.Post)
 }
