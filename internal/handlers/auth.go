@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/fatjan/gogomanager/internal/dto"
+	"github.com/fatjan/gogomanager/internal/pkg/exceptions"
 	"github.com/fatjan/gogomanager/internal/useCases/auth"
 	"github.com/gin-gonic/gin"
 )
@@ -30,7 +31,7 @@ func (r *authHandler) Post(ginCtx *gin.Context) {
 	if authRequest.Action == string(dto.Create) {
 		authResponse, err := r.authUseCase.Register(&authRequest)
 		if err != nil {
-			ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			ginCtx.JSON(exceptions.MapToHttpStatusCode(err), gin.H{"error": err.Error()})
 			return
 		}
 		ginCtx.JSON(http.StatusCreated, authResponse)
@@ -38,7 +39,7 @@ func (r *authHandler) Post(ginCtx *gin.Context) {
 	} else if authRequest.Action == string(dto.Login) {
 		authResponse, err := r.authUseCase.Login(&authRequest)
 		if err != nil {
-			ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			ginCtx.JSON(exceptions.MapToHttpStatusCode(err), gin.H{"error": err.Error()})
 			return
 		}
 		ginCtx.JSON(http.StatusOK, authResponse)

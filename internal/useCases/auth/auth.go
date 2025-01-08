@@ -4,6 +4,7 @@ import (
 	"github.com/fatjan/gogomanager/internal/config"
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
+	"github.com/fatjan/gogomanager/internal/pkg/exceptions"
 	"github.com/fatjan/gogomanager/internal/pkg/jwt_helper"
 	"github.com/fatjan/gogomanager/internal/repositories/auth"
 )
@@ -30,6 +31,10 @@ func (uc *useCase) Login(authRequest *dto.AuthRequest) (*dto.AuthResponse, error
 	manager, err := uc.authRepository.FindByEmail(authRequest.Email)
 	if err != nil {
 		return nil, err
+	}
+
+	if manager == nil {
+		return nil, exceptions.ErrNotFound
 	}
 
 	err = authRequest.ComparePassword(manager.Password)

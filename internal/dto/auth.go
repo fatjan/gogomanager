@@ -24,8 +24,8 @@ type AuthRequest struct {
 }
 
 type AuthResponse struct {
-	Email string
-	Token string
+	Email string `json:"email"`
+	Token string `json:"token"`
 }
 
 func (d *AuthRequest) ValidatePayloadAuth() error {
