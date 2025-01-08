@@ -1,6 +1,6 @@
 package models
 
 type Department struct {
-	ID   string
+	ID   int
 	Name string
 }
