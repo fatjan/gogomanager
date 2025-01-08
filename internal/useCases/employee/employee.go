@@ -22,14 +22,25 @@ func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.Ge
 	allEmployee := make([]*dto.EmployeeResponse, 0)
 	for _, v := range employees {
 		employeeDto := &dto.EmployeeResponse{
-			Name: v.Name,
-			Gender: v.Gender,
-			DepartmentID: v.DepartmentID,
-			EmployeeImageURI: v. EmployeeImageURI,
-			IdentityNumber: v.IdentityNumber,
+			Name:             v.Name,
+			Gender:           v.Gender,
+			DepartmentID:     v.DepartmentID,
+			EmployeeImageURI: v.EmployeeImageURI,
+			IdentityNumber:   v.IdentityNumber,
 		}
 		allEmployee = append(allEmployee, employeeDto)
 	}
 
 	return &dto.GetAllEmployeeResponse{Employees: allEmployee}, nil
+}
+
+func (uc *useCase) DeleteByIdentityNumber(identityNumber string) error {
+	err := uc.employeeRepository.DeleteByIdentityNumber(identityNumber)
+	if err != nil {
+		if err.Error() == "employee is not found" {
+			return err
+		}
+	}
+
+	return nil
 }

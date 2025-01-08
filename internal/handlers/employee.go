@@ -1,15 +1,17 @@
 package handlers
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/useCases/employee"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type EmployeeHandler interface {
 	Get(ginCtx *gin.Context)
+	Delete(ginCtx *gin.Context)
 }
 
 type employeeHandler struct {
@@ -23,7 +25,7 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 		limitInt = 5
 	}
 	if limitInt > 100 {
-		limitInt = 100 
+		limitInt = 100
 	}
 
 	offset := ginCtx.DefaultQuery("offset", "0")
@@ -49,11 +51,11 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 
 	employeeRequest := dto.EmployeeRequest{
 		IdentityNumber: identityNumber,
-		Name: name,
-		Gender: gender,
-		DepartmentID: departmentID,
-		Limit: limitInt,
-		Offset: offsetInt,
+		Name:           name,
+		Gender:         gender,
+		DepartmentID:   departmentID,
+		Limit:          limitInt,
+		Offset:         offsetInt,
 	}
 
 	employeeResponse, err := r.employeeUseCase.GetAllEmployee(&employeeRequest)
@@ -65,6 +67,25 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, employeeResponse)
 }
 
+func (r *employeeHandler) Delete(ginCtx *gin.Context) {
+	identityNumber := ginCtx.Param("identityNumber")
+	if identityNumber == "" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "identity number is required"})
+		return
+	}
+
+	err := r.employeeUseCase.DeleteByIdentityNumber(identityNumber)
+	if err != nil {
+		if err.Error() == "employee is not found" {
+			ginCtx.JSON(http.StatusNotFound, gin.H{"error": "identityNumber is not found"})
+			return
+		}
+		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, gin.H{"message": "employee deleted successfully"})
+}
 func NewEmployeeHandler(employeeUseCase employee.UseCase) EmployeeHandler {
 	return &employeeHandler{employeeUseCase: employeeUseCase}
 }

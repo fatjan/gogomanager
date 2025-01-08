@@ -1,12 +1,14 @@
 package employee
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
-	"log"
-	"strconv"
 )
 
 type repository struct {
@@ -20,7 +22,7 @@ func NewEmployeeRepository(db *sqlx.DB) Repository {
 func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Employee, error) {
 	limit := employeeRequest.Limit
 	offset := employeeRequest.Offset
-	
+
 	baseQuery := fmt.Sprintf("SELECT * FROM employees WHERE 1=1")
 	var args []interface{}
 	var argIndex int
@@ -65,7 +67,7 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 		log.Println("error query GetAll Employee")
 		return nil, err
 	}
-	
+
 	for rows.Next() {
 		var employee models.Employee
 		err := rows.StructScan(&employee)
@@ -77,4 +79,22 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	}
 
 	return employees, nil
+}
+
+func (r *repository) DeleteByIdentityNumber(identityNumber string) error {
+	result, err := r.db.Exec("DELETE FROM employees WHERE identity_number = $1", identityNumber)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("employee is not found")
+	}
+
+	return nil
 }
