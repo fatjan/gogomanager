@@ -10,14 +10,8 @@ func SuccessNoContent(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
-func SuccessWithMetadata(c *gin.Context, data any, metadata any) {
-	r := Response{Data: data}
-
-	if metadata != nil {
-		r.Metadata = metadata
-	}
-
-	c.JSON(http.StatusOK, r)
+func Success(c *gin.Context, data any) {
+	c.JSON(http.StatusOK, data)
 }
 
 func Failed(c *gin.Context, httpCode int, err error) {

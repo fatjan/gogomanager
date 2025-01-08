@@ -7,8 +7,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
-	"github.com/fatjan/gogomanager/pkg/pagination"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -89,7 +89,7 @@ func (r *repository) DeleteByID(ctx context.Context, id int) error {
 	return nil
 }
 
-func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFilter, page pagination.Request) ([]*models.Department, error) {
+func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFilter, page dto.PaginationRequest) ([]*models.Department, error) {
 	whereClause := []string{}
 	args := []interface{}{}
 	argCount := 1
@@ -114,7 +114,7 @@ func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFil
 					LIMIT $%d OFFSET $%d`,
 		whereStr, argCount, argCount+1)
 
-	args = append(args, page.GetLimit(), page.GetOffset())
+	args = append(args, page.Limit, page.Offset)
 
 	departments := []*models.Department{}
 	err := r.db.SelectContext(ctx, &departments, query, args...)

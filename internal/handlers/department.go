@@ -38,7 +38,7 @@ func (r *departmentHandler) Post(ginCtx *gin.Context) {
 		return
 	}
 
-	delivery.SuccessWithMetadata(ginCtx, departmentResponse, nil)
+	delivery.Success(ginCtx, departmentResponse)
 }
 
 func (r *departmentHandler) Update(ginCtx *gin.Context) {
@@ -70,7 +70,7 @@ func (r *departmentHandler) Update(ginCtx *gin.Context) {
 		return
 	}
 
-	delivery.SuccessWithMetadata(ginCtx, departmentResponse, nil)
+	delivery.Success(ginCtx, departmentResponse)
 }
 
 func (r *departmentHandler) Delete(ginCtx *gin.Context) {
@@ -115,7 +115,7 @@ func (r *departmentHandler) Index(ginCtx *gin.Context) {
 		return
 	}
 
-	delivery.SuccessWithMetadata(ginCtx, response.Departments, response.PaginationResponse)
+	delivery.Success(ginCtx, response)
 }
 
 func NewDepartmentHandler(departmentUseCase department.UseCase) DepartmentHandler {

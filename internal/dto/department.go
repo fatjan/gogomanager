@@ -1,7 +1,5 @@
 package dto
 
-import "github.com/fatjan/gogomanager/pkg/pagination"
-
 type Department struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
@@ -20,10 +18,5 @@ type GetAllDepartmentRequest struct {
 	Name      string `form:"name"`
 	ManagerID int    `form:"-"`
 
-	pagination.Request
-}
-
-type GetAllDepartmentResponse struct {
-	Departments        []*DepartmentResponse
-	PaginationResponse *pagination.Response
+	PaginationRequest
 }

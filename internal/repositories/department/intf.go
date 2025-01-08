@@ -3,8 +3,8 @@ package department
 import (
 	"context"
 
+	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
-	"github.com/fatjan/gogomanager/pkg/pagination"
 )
 
 type DepartmentFilter struct {
@@ -20,6 +20,6 @@ type Repository interface {
 	FindAllWithFilter(
 		context.Context,
 		DepartmentFilter,
-		pagination.Request,
+		dto.PaginationRequest,
 	) ([]*models.Department, error)
 }

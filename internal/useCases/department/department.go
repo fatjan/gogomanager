@@ -7,7 +7,6 @@ import (
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/fatjan/gogomanager/internal/repositories/department"
-	"github.com/fatjan/gogomanager/pkg/pagination"
 )
 
 type useCase struct {
@@ -72,13 +71,13 @@ func (uc *useCase) DeleteDepartment(c context.Context, departmentID int) error {
 	return nil
 }
 
-func (uc *useCase) GetAllDepartment(c context.Context, req dto.GetAllDepartmentRequest) (*dto.GetAllDepartmentResponse, error) {
+func (uc *useCase) GetAllDepartment(c context.Context, req dto.GetAllDepartmentRequest) ([]*dto.DepartmentResponse, error) {
 	filter := department.DepartmentFilter{
 		ManagerID: req.ManagerID,
 		Name:      req.Name,
 	}
 
-	departmentRecords, err := uc.departmentRepository.FindAllWithFilter(c, filter, req.Request)
+	departmentRecords, err := uc.departmentRepository.FindAllWithFilter(c, filter, req.PaginationRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -91,8 +90,5 @@ func (uc *useCase) GetAllDepartment(c context.Context, req dto.GetAllDepartmentR
 		})
 	}
 
-	return &dto.GetAllDepartmentResponse{
-		Departments:        departments,
-		PaginationResponse: pagination.NewResponse(departments, req.Request),
-	}, nil
+	return departments, nil
 }
