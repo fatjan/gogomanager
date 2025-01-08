@@ -2,17 +2,20 @@ package handlers
 
 import (
 	"github.com/fatjan/gogomanager/internal/config"
+	authRepository "github.com/fatjan/gogomanager/internal/repositories/auth"
 	departmentRepository "github.com/fatjan/gogomanager/internal/repositories/department"
 	duckRepository "github.com/fatjan/gogomanager/internal/repositories/duck"
 	employeeRepository "github.com/fatjan/gogomanager/internal/repositories/employee"
+	authUseCase "github.com/fatjan/gogomanager/internal/useCases/auth"
 	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
 	duckUseCase "github.com/fatjan/gogomanager/internal/useCases/duck"
 	employeeUseCase "github.com/fatjan/gogomanager/internal/useCases/employee"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
 
-func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
+func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	duckRepository := duckRepository.NewDuckRepository(db)
 	duckUseCase := duckUseCase.NewUseCase(duckRepository)
 	duckHandler := NewDuckHandler(duckUseCase)
@@ -37,4 +40,11 @@ func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
 
 	employeeRouter := v1.Group("employee")
 	employeeRouter.GET("/", employeeHandler.Get)
+
+	authRepository := authRepository.NewAuthRepository(db)
+	authUseCase := authUseCase.NewUseCase(authRepository, cfgData)
+	authHandler := NewAuthHandler(authUseCase)
+
+	authRouter := v1.Group("auth")
+	authRouter.POST("/", authHandler.Post)
 }
