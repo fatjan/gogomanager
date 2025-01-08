@@ -19,21 +19,16 @@ type employeeHandler struct {
 func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	limit := ginCtx.DefaultQuery("limit", "5")
 	limitInt, err := strconv.Atoi(limit)
-	if err != nil {
+	if err != nil || limitInt < 0 {
 		limitInt = 5
-	}
-	if limitInt > 100 {
+	} else if limitInt > 100 {
 		limitInt = 100 
 	}
 
 	offset := ginCtx.DefaultQuery("offset", "0")
 	offsetInt, err := strconv.Atoi(offset)
-	if err != nil {
+	if err != nil || offsetInt < 0 {
 		offsetInt = 0
-	}
-	if offsetInt < 0 {
-		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Offset cannot be negative"})
-		return
 	}
 
 	identityNumber := ginCtx.DefaultQuery("identityNumber", "")
