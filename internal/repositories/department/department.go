@@ -114,7 +114,7 @@ func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFil
 					LIMIT $%d OFFSET $%d`,
 		whereStr, argCount, argCount+1)
 
-	args = append(args, page.Limit, page.Offset)
+	args = append(args, page.GetLimit(), page.GetOffset())
 
 	departments := []*models.Department{}
 	err := r.db.SelectContext(ctx, &departments, query, args...)

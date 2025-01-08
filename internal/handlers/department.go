@@ -105,7 +105,6 @@ func (r *departmentHandler) Index(ginCtx *gin.Context) {
 		delivery.Failed(ginCtx, http.StatusBadRequest, err)
 		return
 	}
-
 	// TODO: set literal value of managerID for now, but later should use value from authentication process
 	req.ManagerID = 1
 
