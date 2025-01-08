@@ -13,13 +13,13 @@ type DepartmentFilter struct {
 }
 
 type Repository interface {
-	Post(*models.Department) (int, error)
-	Update(int, *models.Department) error
-	FindOneByID(int) (*models.Department, error)
-	DeleteByID(int) error
+	Post(context.Context, *models.Department) (int, error)
+	Update(context.Context, int, *models.Department) error
+	FindOneByID(context.Context, int) (*models.Department, error)
+	DeleteByID(context.Context, int) error
 	FindAllWithFilter(
-		ctx context.Context,
-		filter DepartmentFilter,
-		pagination pagination.Request,
+		context.Context,
+		DepartmentFilter,
+		pagination.Request,
 	) ([]*models.Department, error)
 }

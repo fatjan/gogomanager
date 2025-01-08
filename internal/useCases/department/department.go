@@ -18,11 +18,11 @@ func NewUseCase(departmentRepository department.Repository) UseCase {
 	return &useCase{departmentRepository: departmentRepository}
 }
 
-func (uc *useCase) PostDepartment(departmentRequest *dto.DepartmentRequest) (*dto.DepartmentResponse, error) {
+func (uc *useCase) PostDepartment(c context.Context, departmentRequest *dto.DepartmentRequest) (*dto.DepartmentResponse, error) {
 	newDepartment := &models.Department{
 		Name: departmentRequest.Name,
 	}
-	departmentId, err := uc.departmentRepository.Post(newDepartment)
+	departmentId, err := uc.departmentRepository.Post(c, newDepartment)
 	if err != nil {
 		return nil, err
 	}
@@ -35,17 +35,17 @@ func (uc *useCase) PostDepartment(departmentRequest *dto.DepartmentRequest) (*dt
 	return departmentResponse, nil
 }
 
-func (uc *useCase) UpdateDepartment(departmentID int, departmentRequest *dto.DepartmentRequest) (*dto.DepartmentResponse, error) {
+func (uc *useCase) UpdateDepartment(c context.Context, departmentID int, departmentRequest *dto.DepartmentRequest) (*dto.DepartmentResponse, error) {
 	newDepartment := &models.Department{
 		Name: departmentRequest.Name,
 	}
 
-	_, err := uc.departmentRepository.FindOneByID(departmentID)
+	_, err := uc.departmentRepository.FindOneByID(c, departmentID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = uc.departmentRepository.Update(departmentID, newDepartment)
+	err = uc.departmentRepository.Update(c, departmentID, newDepartment)
 	if err != nil {
 		return nil, err
 	}
@@ -58,13 +58,13 @@ func (uc *useCase) UpdateDepartment(departmentID int, departmentRequest *dto.Dep
 	return departmentResponse, nil
 }
 
-func (uc *useCase) DeleteDepartment(departmentID int) error {
-	_, err := uc.departmentRepository.FindOneByID(departmentID)
+func (uc *useCase) DeleteDepartment(c context.Context, departmentID int) error {
+	_, err := uc.departmentRepository.FindOneByID(c, departmentID)
 	if err != nil {
 		return err
 	}
 
-	err = uc.departmentRepository.DeleteByID(departmentID)
+	err = uc.departmentRepository.DeleteByID(c, departmentID)
 	if err != nil {
 		return err
 	}

@@ -32,7 +32,7 @@ func (r *departmentHandler) Post(ginCtx *gin.Context) {
 		return
 	}
 
-	departmentResponse, err := r.departmentUseCase.PostDepartment(&departmentRequest)
+	departmentResponse, err := r.departmentUseCase.PostDepartment(ginCtx.Request.Context(), &departmentRequest)
 	if err != nil {
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -53,7 +53,7 @@ func (r *departmentHandler) Update(ginCtx *gin.Context) {
 		return
 	}
 
-	departmentResponse, err := r.departmentUseCase.UpdateDepartment(departmentIDInt, &departmentRequest)
+	departmentResponse, err := r.departmentUseCase.UpdateDepartment(ginCtx.Request.Context(), departmentIDInt, &departmentRequest)
 	if err != nil {
 
 		statusRes := http.StatusInternalServerError
@@ -75,7 +75,7 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 	departmentID := ginCtx.Param("id")
 
 	departmentIDInt, _ := strconv.Atoi(departmentID)
-	err := r.departmentUseCase.DeleteDepartment(departmentIDInt)
+	err := r.departmentUseCase.DeleteDepartment(ginCtx.Request.Context(), departmentIDInt)
 	if err != nil {
 
 		statusRes := http.StatusInternalServerError
