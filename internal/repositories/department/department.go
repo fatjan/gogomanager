@@ -119,7 +119,7 @@ func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFil
 	departments := []*models.Department{}
 	err := r.db.SelectContext(ctx, &departments, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("error get all manager query: %w", err)
+		return nil, fmt.Errorf("error get all department query: %w", err)
 	}
 
 	return departments, nil
