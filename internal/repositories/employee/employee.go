@@ -32,13 +32,13 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	employeeImageURI := employeeRequest.EmployeeImageURI
 
 	if idNumber != "" {
-		baseQuery += " AND identity_number LIKE $" + strconv.Itoa(argIndex+1)
+		baseQuery += " AND identity_number ILIKE $" + strconv.Itoa(argIndex+1)
 		args = append(args, "%"+idNumber+"%")
 		argIndex++
 	}
 
 	if name != "" {
-		baseQuery += " AND name LIKE $" + strconv.Itoa(argIndex+1)
+		baseQuery += " AND name ILIKE $" + strconv.Itoa(argIndex+1)
 		args = append(args, "%"+name+"%")
 		argIndex++
 	}
@@ -52,12 +52,6 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	if departmentID != "0" {
 		baseQuery += " AND department_id = $" + strconv.Itoa(argIndex+1)
 		args = append(args, departmentID)
-		argIndex++
-	}
-
-	if employeeImageURI != "" {
-		baseQuery += " AND employee_image_uri = $" + strconv.Itoa(argIndex+1)
-		args = append(args, employeeImageURI)
 		argIndex++
 	}
 
