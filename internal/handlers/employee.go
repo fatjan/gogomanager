@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"log"
 )
 
 type EmployeeHandler interface {
@@ -24,11 +23,18 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit value"})
 		return
 	}
+	if limitInt > 100 {
+		limitInt = 100 
+	}
 
 	offset := ginCtx.DefaultQuery("offset", "0")
 	offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset value"})
+		return
+	}
+	if offsetInt < 0 {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Offset cannot be negative"})
 		return
 	}
 
@@ -53,7 +59,7 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 		Limit: limitInt,
 		Offset: offsetInt,
 	}
-	log.Printf("employeeHandler", employeeRequest)
+
 	employeeResponse, err := r.employeeUseCase.GetAllEmployee(&employeeRequest)
 	if err != nil {
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
