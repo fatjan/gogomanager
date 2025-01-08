@@ -5,11 +5,9 @@ import (
 	"github.com/fatjan/gogomanager/internal/pkg/jwt_helper"
 	authRepository "github.com/fatjan/gogomanager/internal/repositories/auth"
 	departmentRepository "github.com/fatjan/gogomanager/internal/repositories/department"
-	duckRepository "github.com/fatjan/gogomanager/internal/repositories/duck"
 	employeeRepository "github.com/fatjan/gogomanager/internal/repositories/employee"
 	authUseCase "github.com/fatjan/gogomanager/internal/useCases/auth"
 	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
-	duckUseCase "github.com/fatjan/gogomanager/internal/useCases/duck"
 	employeeUseCase "github.com/fatjan/gogomanager/internal/useCases/employee"
 
 	userRepository "github.com/fatjan/gogomanager/internal/repositories/user"
@@ -22,14 +20,7 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	// integrasi jwt
 	jwtMiddleware := jwt_helper.JWTMiddleware(cfgData.JwtKey)
 
-	duckRepository := duckRepository.NewDuckRepository(db)
-	duckUseCase := duckUseCase.NewUseCase(duckRepository)
-	duckHandler := NewDuckHandler(duckUseCase)
-
 	v1 := r.Group("v1")
-	duckRouter := v1.Group("ducks")
-	duckRouter.GET("/", duckHandler.Index)
-	duckRouter.GET("/:id", duckHandler.Detail)
 
 	departmentRepository := departmentRepository.NewDepartmentRepository(db)
 	departmentUseCase := departmentUseCase.NewUseCase(departmentRepository)
