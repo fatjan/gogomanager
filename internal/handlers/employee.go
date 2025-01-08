@@ -19,7 +19,7 @@ type employeeHandler struct {
 func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	limit := ginCtx.DefaultQuery("limit", "5")
 	limitInt, err := strconv.Atoi(limit)
-	if err != nil || limitInt < 0 {
+	if err != nil || limitInt <= 0 {
 		limitInt = 5
 	} else if limitInt > 100 {
 		limitInt = 100 
