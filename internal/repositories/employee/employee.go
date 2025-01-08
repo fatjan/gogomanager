@@ -29,7 +29,6 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	name := employeeRequest.Name
 	gender := employeeRequest.Gender
 	departmentID := employeeRequest.DepartmentID
-	employeeImageURI := employeeRequest.EmployeeImageURI
 
 	if idNumber != "" {
 		baseQuery += " AND identity_number ILIKE $" + strconv.Itoa(argIndex+1)

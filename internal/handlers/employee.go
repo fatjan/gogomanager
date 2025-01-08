@@ -40,7 +40,6 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	name := ginCtx.DefaultQuery("name", "")
 	gender := dto.GenderType(ginCtx.DefaultQuery("gender", ""))
 	departmentID := ginCtx.DefaultQuery("departmentId", "0")
-	employeeImageURI := ginCtx.DefaultQuery("employeeImageUri", "")
 
 	_, err = strconv.Atoi(departmentID)
 	if err != nil {
@@ -53,7 +52,6 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 		Name: name,
 		Gender: gender,
 		DepartmentID: departmentID,
-		EmployeeImageURI: employeeImageURI,
 		Limit: limitInt,
 		Offset: offsetInt,
 	}
