@@ -40,6 +40,7 @@ func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
 	employeeRouter := v1.Group("employee")
 	employeeRouter.GET("/", employeeHandler.Get)
 	employeeRouter.DELETE("/:identityNumber", employeeHandler.Delete)
+	employeeRouter.PATCH("/:identityNumber", employeeHandler.Update)
 
 	userRepository := userRepository.NewUserRepository(db)
 	userUseCase := userUseCase.NewUseCase(userRepository)

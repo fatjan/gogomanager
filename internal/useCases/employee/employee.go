@@ -1,7 +1,11 @@
 package employee
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/fatjan/gogomanager/internal/dto"
+	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/fatjan/gogomanager/internal/repositories/employee"
 )
 
@@ -43,4 +47,47 @@ func (uc *useCase) DeleteByIdentityNumber(identityNumber string) error {
 	}
 
 	return nil
+}
+
+func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error) {
+	employee, err := uc.employeeRepository.FindByIdentityNumber(identityNumber)
+	if err != nil {
+		if err.Error() == "employee not found" {
+			return nil, err
+		}
+	}
+
+	if employee.IdentityNumber == req.IdentityNumber {
+		return nil, errors.New("duplicate identity number")
+	}
+
+	departmentID, err := strconv.Atoi(req.DepartmentID)
+	if err != nil {
+		return nil, errors.New("invalid department id format")
+	}
+
+	employees := models.UpdateEmployee{
+		IdentityNumber:   req.IdentityNumber,
+		Name:             req.Name,
+		EmployeeImageURI: req.EmployeeImageURI,
+		Gender:           models.GenderType(req.Gender),
+		DepartmentID:     departmentID,
+	}
+
+	updatedEmployee, err := uc.employeeRepository.UpdateEmployee(identityNumber, &employees)
+	if err != nil {
+		return nil, err
+	}
+
+	responseDepartmentID := strconv.Itoa(updatedEmployee.DepartmentID)
+
+	response := &dto.UpdateEmployeeResponse{
+		IdentityNumber:   updatedEmployee.IdentityNumber,
+		Name:             updatedEmployee.Name,
+		EmployeeImageURI: updatedEmployee.EmployeeImageURI,
+		Gender:           string(updatedEmployee.Gender),
+		DepartmentID:     responseDepartmentID,
+	}
+
+	return response, nil
 }
