@@ -26,7 +26,6 @@ func (uc *useCase) Login(authRequest *dto.AuthRequest) (*dto.AuthResponse, error
 		return nil, err
 	}
 	authRequest.SetName()
-	authRequest.HashPassword()
 
 	manager, err := uc.authRepository.FindByEmail(authRequest.Email)
 	if err != nil {

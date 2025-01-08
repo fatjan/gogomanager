@@ -38,13 +38,13 @@ func (d *AuthRequest) ValidatePayloadAuth() error {
 	if d.Action == "" {
 		return exceptions.ErrorRequired("action")
 	}
-	if isValidEmail(d.Email) {
+	if !isValidEmail(d.Email) {
 		return exceptions.ErrorInValid("email")
 	}
-	if isValidPasswordLength(d.Password, 8, 32) {
+	if !isValidPasswordLength(d.Password, 8, 32) {
 		return exceptions.ErrorInValid("email")
 	}
-	if isValidAction(d.Action) {
+	if !isValidAction(d.Action) {
 		return exceptions.ErrorInValid("action")
 	}
 	return nil
@@ -86,7 +86,7 @@ func (d *AuthRequest) HashPassword() error {
 }
 
 func (d *AuthRequest) ComparePassword(password string) error {
-	errCompare := bcrypt.CompareHashAndPassword([]byte(d.Password), []byte(password))
+	errCompare := bcrypt.CompareHashAndPassword([]byte(password), []byte(d.Password))
 	if errCompare != nil {
 		return errors.New("password or username is wrong")
 	}
