@@ -1,7 +1,12 @@
 package handlers
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/useCases/user"
@@ -10,6 +15,7 @@ import (
 
 type UserHandler interface {
 	Get(ginCtx *gin.Context)
+	Update(ginCtx *gin.Context)
 }
 
 type userHandler struct {
@@ -27,6 +33,34 @@ func (r *userHandler) Get(ginCtx *gin.Context) {
 	userResponse, err := r.userUseCase.GetUser(&userRequest)
 	if err != nil {
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, userResponse)
+}
+func (r *userHandler) Update(ginCtx *gin.Context) {
+	var userRequest dto.UserPatchRequest
+
+	userID := ginCtx.Param("id")
+
+	userIDInt, _ := strconv.Atoi(userID)
+
+	if err := ginCtx.ShouldBindJSON(&userRequest); err != nil {
+		log.Println(err.Error())
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+	userResponse, err := r.userUseCase.UpdateUser(ginCtx.Request.Context(), userIDInt, &userRequest)
+	if err != nil {
+		statusRes := http.StatusInternalServerError
+		errorMessageRes := errors.New("internal server error")
+		if errors.Is(err, sql.ErrNoRows) {
+			log.Println(fmt.Sprintf("user with id %d not found", userIDInt))
+			statusRes = http.StatusNotFound
+			errorMessageRes = errors.New(fmt.Sprintf("user with id %d not found", userIDInt))
+		}
+
+		ginCtx.JSON(statusRes, gin.H{"error": errorMessageRes.Error()})
 		return
 	}
 

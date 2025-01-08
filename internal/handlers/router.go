@@ -46,4 +46,5 @@ func SetupRouter(_ *config.Config, db *sqlx.DB, r *gin.Engine) {
 
 	userRouter := v1.Group("user")
 	userRouter.GET("/", userHandler.Get)
+	userRouter.PATCH("/:id", userHandler.Update)
 }

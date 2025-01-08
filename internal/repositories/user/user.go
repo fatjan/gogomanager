@@ -1,7 +1,11 @@
 package user
 
 import (
+	"context"
 	"database/sql"
+	"errors"
+	"github.com/fatjan/gogomanager/internal/dto"
+	"log"
 
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -47,4 +51,27 @@ func (r *repository) GetUser(id int) (*models.User, error) {
 	user.CompanyImageUri = nullFields.CompanyImageUri.String
 
 	return user, nil
+}
+func (r *repository) Update(_ context.Context, userID int, request *dto.UserPatchRequest) error {
+
+	result, err := r.db.Exec(
+		"UPDATE managers SET email = $1,name = $2,user_image_uri = $3, company_name = $4, company_image_uri = $5 WHERE id = $6",
+		request.Email, request.Name, request.UserImageUri, request.CompanyName, request.CompanyImageUri,
+		userID,
+	)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("error query")
+		return err
+	}
+	if rowsAffected == 0 {
+		log.Println("failed update manager")
+		return errors.New("update query failed")
+	}
+
+	return nil
 }
