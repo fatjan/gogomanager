@@ -6,7 +6,7 @@ import (
 
 type (
 	Request struct {
-		Limit  int64 `form:"limit,default=10"`
+		Limit  int64 `form:"limit,default=5"`
 		Offset int64 `form:"offset,default=0"`
 	}
 
@@ -19,7 +19,7 @@ type (
 
 func (p Request) GetLimit() int64 {
 	if p.Limit < 1 {
-		return 10
+		return 5
 	}
 	return p.Limit
 }
