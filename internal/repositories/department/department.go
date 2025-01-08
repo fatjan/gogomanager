@@ -1,10 +1,15 @@
 package department
 
 import (
+	"context"
 	"errors"
-	"github.com/fatjan/gogomanager/internal/models"
-	"github.com/jmoiron/sqlx"
+	"fmt"
 	"log"
+	"strings"
+
+	"github.com/fatjan/gogomanager/internal/models"
+	"github.com/fatjan/gogomanager/pkg/pagination"
+	"github.com/jmoiron/sqlx"
 )
 
 type repository struct {
@@ -84,4 +89,40 @@ func (r *repository) DeleteByID(id int) error {
 	}
 
 	return nil
+}
+
+func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFilter, page pagination.Request) ([]*models.Department, error) {
+	whereClause := []string{}
+	args := []interface{}{}
+	argCount := 1
+
+	whereClause = append(whereClause, fmt.Sprintf("manager_id = $%d", argCount))
+	args = append(args, filter.ManagerID)
+	argCount++
+
+	if filter.Name != "" {
+		whereClause = append(whereClause, fmt.Sprintf("name ILIKE $%d", argCount))
+		args = append(args, "%"+filter.Name+"%")
+		argCount++
+	}
+
+	whereStr := "WHERE " + strings.Join(whereClause, " AND ")
+
+	query := fmt.Sprintf(`
+			SELECT id, name, manager_id, created_at, updated_at
+			FROM departments
+			%s
+			ORDER BY id
+			LIMIT $%d OFFSET $%d`,
+		whereStr, argCount, argCount+1)
+
+	args = append(args, page.Limit, page.Offset)
+
+	departments := []*models.Department{}
+	err := r.db.SelectContext(ctx, &departments, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return departments, nil
 }

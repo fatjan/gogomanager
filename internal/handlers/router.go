@@ -38,6 +38,7 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	departmentRouter := v1.Group("department")
 	departmentRouter.Use(jwtMiddleware)
 	departmentRouter.POST("/", departmentHandler.Post)
+	departmentRouter.GET("/", departmentHandler.Index)
 	departmentRouter.PATCH("/:id", departmentHandler.Update)
 	departmentRouter.DELETE("/:id", departmentHandler.Delete)
 

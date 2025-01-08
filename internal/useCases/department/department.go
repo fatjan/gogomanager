@@ -1,9 +1,13 @@
 package department
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/fatjan/gogomanager/internal/repositories/department"
+	"github.com/fatjan/gogomanager/pkg/pagination"
 )
 
 type useCase struct {
@@ -24,7 +28,7 @@ func (uc *useCase) PostDepartment(departmentRequest *dto.DepartmentRequest) (*dt
 	}
 
 	departmentResponse := &dto.DepartmentResponse{
-		DepartmentID: departmentId,
+		DepartmentID: fmt.Sprint(departmentId),
 		Name:         departmentRequest.Name,
 	}
 
@@ -47,7 +51,7 @@ func (uc *useCase) UpdateDepartment(departmentID int, departmentRequest *dto.Dep
 	}
 
 	departmentResponse := &dto.DepartmentResponse{
-		DepartmentID: departmentID,
+		DepartmentID: fmt.Sprint(departmentID),
 		Name:         departmentRequest.Name,
 	}
 
@@ -55,7 +59,6 @@ func (uc *useCase) UpdateDepartment(departmentID int, departmentRequest *dto.Dep
 }
 
 func (uc *useCase) DeleteDepartment(departmentID int) error {
-
 	_, err := uc.departmentRepository.FindOneByID(departmentID)
 	if err != nil {
 		return err
@@ -67,4 +70,29 @@ func (uc *useCase) DeleteDepartment(departmentID int) error {
 	}
 
 	return nil
+}
+
+func (uc *useCase) GetAllDepartment(c context.Context, req dto.GetAllDepartmentRequest) (*dto.GetAllDepartmentResponse, error) {
+	filter := department.DepartmentFilter{
+		ManagerID: req.ManagerID,
+		Name:      req.Name,
+	}
+
+	departmentRecords, err := uc.departmentRepository.FindAllWithFilter(c, filter, req.Request)
+	if err != nil {
+		return nil, err
+	}
+
+	departments := make([]*dto.DepartmentResponse, 0)
+	for _, v := range departmentRecords {
+		departments = append(departments, &dto.DepartmentResponse{
+			DepartmentID: fmt.Sprint(v.ID),
+			Name:         v.Name,
+		})
+	}
+
+	return &dto.GetAllDepartmentResponse{
+		Departments:        departments,
+		PaginationResponse: pagination.NewResponse(departments, req.Request),
+	}, nil
 }

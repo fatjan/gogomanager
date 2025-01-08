@@ -4,18 +4,21 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/fatjan/gogomanager/internal/dto"
-	"github.com/fatjan/gogomanager/internal/useCases/department"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/fatjan/gogomanager/internal/dto"
+	"github.com/fatjan/gogomanager/internal/useCases/department"
+	"github.com/fatjan/gogomanager/pkg/delivery"
+	"github.com/gin-gonic/gin"
 )
 
 type DepartmentHandler interface {
 	Post(ginCtx *gin.Context)
 	Update(ginCtx *gin.Context)
 	Delete(ginCtx *gin.Context)
+	Index(ginCtx *gin.Context)
 }
 
 type departmentHandler struct {
@@ -89,6 +92,22 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 	}
 
 	ginCtx.JSON(http.StatusOK, "OK")
+}
+
+func (r *departmentHandler) Index(ginCtx *gin.Context) {
+	var req dto.GetAllDepartmentRequest
+	if err := ginCtx.ShouldBindUri(&req); err != nil {
+		delivery.Failed(ginCtx, http.StatusBadRequest, err)
+		return
+	}
+
+	response, err := r.departmentUseCase.GetAllDepartment(ginCtx.Request.Context(), req)
+	if err != nil {
+		delivery.Failed(ginCtx, http.StatusInternalServerError, err)
+		return
+	}
+
+	delivery.SuccessWithMetadata(ginCtx, response.Departments, response.PaginationResponse)
 }
 
 func NewDepartmentHandler(departmentUseCase department.UseCase) DepartmentHandler {
