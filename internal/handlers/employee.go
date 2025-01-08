@@ -20,8 +20,7 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	limit := ginCtx.DefaultQuery("limit", "5")
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
-		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit value"})
-		return
+		limitInt = 5
 	}
 	if limitInt > 100 {
 		limitInt = 100 
@@ -30,8 +29,7 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	offset := ginCtx.DefaultQuery("offset", "0")
 	offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
-		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset value"})
-		return
+		offsetInt = 0
 	}
 	if offsetInt < 0 {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Offset cannot be negative"})
