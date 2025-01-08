@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type GenderType string
 
 const (
@@ -15,4 +17,6 @@ type Employee struct {
 	DepartmentID 		string  `db:"department_id"`
 	ManagerID			int 	`db:"manager_id"`
 	EmployeeImageURI 	string  `db:"employee_image_uri"`
+	CreatedAt         time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
 }

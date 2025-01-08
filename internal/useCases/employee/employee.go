@@ -2,7 +2,6 @@ package employee
 
 import (
 	"github.com/fatjan/gogomanager/internal/dto"
-	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/fatjan/gogomanager/internal/repositories/employee"
 )
 
@@ -22,11 +21,12 @@ func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.Ge
 
 	allEmployee := make([]*dto.EmployeeResponse, 0)
 	for _, v := range employees {
-		employeeDto := &models.Employee{
+		employeeDto := &dto.EmployeeResponse{
 			Name: v.Name,
 			Gender: v.Gender,
 			DepartmentID: v.DepartmentID,
 			EmployeeImageURI: v. EmployeeImageURI,
+			IdentityNumber: v.IdentityNumber,
 		}
 		allEmployee = append(allEmployee, employeeDto)
 	}

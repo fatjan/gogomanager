@@ -3,6 +3,7 @@ package employee
 import (
 	"fmt"
 	"github.com/fatjan/gogomanager/internal/dto"
+	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
 	"log"
 	"strconv"
@@ -16,7 +17,7 @@ func NewEmployeeRepository(db *sqlx.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*dto.Employee, error) {
+func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Employee, error) {
 	log.Printf("repo", employeeRequest)
 	limit := employeeRequest.Limit
 	offset := employeeRequest.Offset
@@ -60,7 +61,7 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*dto.Employ
 		args = append(args, employeeImageURI)
 	}
 
-	employees := make([]*dto.Employee, 0)
+	employees := make([]*models.Employee, 0)
 
 	log.Println(baseQuery)
 	rows, err := r.db.Queryx(baseQuery, args...)
@@ -70,7 +71,7 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*dto.Employ
 	}
 	
 	for rows.Next() {
-		var employee dto.Employee
+		var employee models.Employee
 		err := rows.StructScan(&employee)
 		log.Println(employee)
 		if err != nil {
