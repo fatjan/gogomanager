@@ -1,11 +1,7 @@
 package department
 
 import (
-<<<<<<< HEAD
 	"errors"
-=======
->>>>>>> refs/remotes/origin/main
-	"fmt"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -23,10 +19,7 @@ func (r *repository) Post(department *models.Department) (int, error) {
 	var newID int
 	err := r.db.QueryRow("INSERT INTO departments (name, manager_id) VALUES ($1, $2) RETURNING id", department.Name, 1).Scan(&newID)
 	if err != nil {
-<<<<<<< HEAD
-=======
 		log.Println("error query")
->>>>>>> refs/remotes/origin/main
 		return 0, err
 	}
 
@@ -38,9 +31,9 @@ func (r *repository) FindOneByID(id int) (*models.Department, error) {
 	department := &models.Department{}
 
 	err := r.db.QueryRow(
-		"SELECT id, name FROM departments WHERE id = $1",
+		"SELECT id, name, manager_id, created_at, updated_at FROM departments WHERE id = $1",
 		id,
-	).Scan(&department.ID, &department.Name)
+	).Scan(&department.ID, &department.Name, &department.ManagerID, &department.CreatedAt, &department.UpdatedAt)
 
 	if err != nil {
 
@@ -69,11 +62,7 @@ func (r *repository) Update(id int, department *models.Department) error {
 	}
 	if rowsAffected == 0 {
 		log.Println("failed update department")
-<<<<<<< HEAD
-		return errors.New(fmt.Sprintf("department with id %d not found", id))
-=======
-		return fmt.Errorf("department with id %d not found", id)
->>>>>>> refs/remotes/origin/main
+		return errors.New("update query failed")
 	}
 
 	return nil
@@ -90,8 +79,8 @@ func (r *repository) DeleteByID(id int) error {
 		return err
 	}
 	if rowsAffected == 0 {
-		log.Println(fmt.Sprintf("department with id %d not found", id))
-		return err
+		log.Println("deleted query is failed")
+		return errors.New("deleted query failed")
 	}
 
 	return nil
