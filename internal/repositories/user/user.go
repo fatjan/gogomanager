@@ -1,6 +1,8 @@
 package user
 
 import (
+	"database/sql"
+
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
 )
@@ -14,6 +16,13 @@ func NewUserRepository(db *sqlx.DB) Repository {
 }
 
 func (r *repository) GetUser(id int) (*models.User, error) {
+	nullFields := struct {
+		Name            sql.NullString
+		UserImageUri    sql.NullString
+		CompanyName     sql.NullString
+		CompanyImageUri sql.NullString
+	}{}
+
 	user := &models.User{}
 
 	err := r.db.QueryRow(`
@@ -22,15 +31,20 @@ func (r *repository) GetUser(id int) (*models.User, error) {
 	from managers 
 	where id = $1;`, id).Scan(
 		&user.Email,
-		&user.Name,
-		&user.UserImageUri,
-		&user.CompanyName,
-		&user.CompanyImageUri,
+		&nullFields.Name,
+		&nullFields.UserImageUri,
+		&nullFields.CompanyName,
+		&nullFields.CompanyImageUri,
 	)
 
 	if err != nil {
 		return nil, err
 	}
+
+	user.Name = nullFields.Name.String
+	user.UserImageUri = nullFields.UserImageUri.String
+	user.CompanyName = nullFields.CompanyName.String
+	user.CompanyImageUri = nullFields.CompanyImageUri.String
 
 	return user, nil
 }
