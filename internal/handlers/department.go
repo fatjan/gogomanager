@@ -28,6 +28,7 @@ func (r *departmentHandler) Post(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
+
 	departmentResponse, err := r.departmentUseCase.PostDepartment(&departmentRequest)
 	if err != nil {
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -57,7 +58,7 @@ func (r *departmentHandler) Update(ginCtx *gin.Context) {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Println(fmt.Sprintf("department with id %d not found", departmentIDInt))
 			statusRes = http.StatusNotFound
-			errorMessageRes = fmt.Errorf("department with id %d not found", departmentIDInt)
+			errorMessageRes = errors.New(fmt.Sprintf("department with id %d not found", departmentIDInt))
 		}
 
 		ginCtx.JSON(statusRes, gin.H{"error": errorMessageRes.Error()})
@@ -79,7 +80,7 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Println(fmt.Sprintf("department with id %d not found", departmentIDInt))
 			statusRes = http.StatusNotFound
-			errorMessageRes = fmt.Errorf("department with id %d not found", departmentIDInt)
+			errorMessageRes = errors.New(fmt.Sprintf("department with id %d not found", departmentIDInt))
 
 		}
 

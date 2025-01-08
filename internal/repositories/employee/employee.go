@@ -68,7 +68,6 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 		log.Println("error query GetAll Employee")
 		return nil, err
 	}
-
 	for rows.Next() {
 		var employee models.Employee
 		err := rows.StructScan(&employee)
