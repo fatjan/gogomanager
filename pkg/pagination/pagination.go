@@ -1,7 +1,6 @@
 package pagination
 
 import (
-	"math"
 	"reflect"
 )
 
@@ -12,27 +11,35 @@ type (
 	}
 
 	Response struct {
-		Total       int64       `json:"total"`
-		CurrentPage int64       `json:"currentPage"`
-		TotalPages  int64       `json:"totalPage"`
-		Limit       int64       `json:"limit"`
-		Data        interface{} `json:"data"`
+		Total  int64 `json:"total"`
+		Offset int64 `json:"offset"`
+		Limit  int64 `json:"limit"`
 	}
 )
 
+func (p Request) GetLimit() int64 {
+	if p.Limit < 1 {
+		return 10
+	}
+	return p.Limit
+}
+
+// Offset is to get offset query
+func (p Request) GetOffset() int64 {
+	if p.Offset < 1 {
+		return 0
+	}
+
+	return p.Offset
+}
+
 func NewResponse(data interface{}, pagination Request) *Response {
-	// Use reflection to get the length of data
 	val := reflect.ValueOf(data)
 	total := int64(val.Len())
 
-	totalPages := int64(math.Ceil(float64(total) / float64(pagination.Limit)))
-	page := int64(pagination.Offset/pagination.Limit + 1)
-
 	return &Response{
-		Data:        data,
-		Total:       total,
-		TotalPages:  totalPages,
-		CurrentPage: page,
-		Limit:       pagination.Limit,
+		Total:  total,
+		Offset: pagination.GetOffset(),
+		Limit:  pagination.GetLimit(),
 	}
 }

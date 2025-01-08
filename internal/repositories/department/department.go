@@ -109,19 +109,19 @@ func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFil
 	whereStr := "WHERE " + strings.Join(whereClause, " AND ")
 
 	query := fmt.Sprintf(`
-			SELECT id, name, manager_id, created_at, updated_at
-			FROM departments
-			%s
-			ORDER BY id
-			LIMIT $%d OFFSET $%d`,
+					SELECT id, name, manager_id, created_at, updated_at
+					FROM departments
+					%s
+					ORDER BY id
+					LIMIT $%d OFFSET $%d`,
 		whereStr, argCount, argCount+1)
 
-	args = append(args, page.Limit, page.Offset)
+	args = append(args, page.GetLimit(), page.GetOffset())
 
 	departments := []*models.Department{}
 	err := r.db.SelectContext(ctx, &departments, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error get all manager query: %w", err)
 	}
 
 	return departments, nil

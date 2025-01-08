@@ -96,10 +96,13 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 
 func (r *departmentHandler) Index(ginCtx *gin.Context) {
 	var req dto.GetAllDepartmentRequest
-	if err := ginCtx.ShouldBindUri(&req); err != nil {
+	if err := ginCtx.ShouldBindQuery(&req); err != nil {
 		delivery.Failed(ginCtx, http.StatusBadRequest, err)
 		return
 	}
+
+	// TODO: set literal value of managerID for now, but later should use value from authentication process
+	req.ManagerID = 1
 
 	response, err := r.departmentUseCase.GetAllDepartment(ginCtx.Request.Context(), req)
 	if err != nil {
