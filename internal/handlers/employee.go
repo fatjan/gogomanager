@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"log"
 )
 
 type EmployeeHandler interface {
@@ -18,20 +19,20 @@ type employeeHandler struct {
 
 func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	limit := ginCtx.DefaultQuery("limit", "5")
-	_, err := strconv.Atoi(limit)
+	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit value"})
 		return
 	}
 
 	offset := ginCtx.DefaultQuery("offset", "0")
-	_, err = strconv.Atoi(offset)
+	offsetInt, err := strconv.Atoi(offset)
 	if err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid offset value"})
 		return
 	}
 
-	idNumber := ginCtx.DefaultQuery("identityNumber", "")
+	identityNumber := ginCtx.DefaultQuery("identityNumber", "")
 	name := ginCtx.DefaultQuery("name", "")
 	gender := dto.GenderType(ginCtx.DefaultQuery("gender", ""))
 	departmentID := ginCtx.DefaultQuery("departmentId", "0")
@@ -44,15 +45,15 @@ func (r *employeeHandler) Get(ginCtx *gin.Context) {
 	}
 
 	employeeRequest := dto.EmployeeRequest{
-		IdentityNumber: idNumber,
+		IdentityNumber: identityNumber,
 		Name: name,
 		Gender: gender,
 		DepartmentID: departmentID,
 		EmployeeImageURI: employeeImageURI,
-		Limit: limit,
-		Offset: offset,
+		Limit: limitInt,
+		Offset: offsetInt,
 	}
-
+	log.Printf("employeeHandler", employeeRequest)
 	employeeResponse, err := r.employeeUseCase.GetAllEmployee(&employeeRequest)
 	if err != nil {
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

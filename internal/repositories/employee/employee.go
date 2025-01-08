@@ -1,8 +1,8 @@
 package employee
 
 import (
+	"fmt"
 	"github.com/fatjan/gogomanager/internal/dto"
-	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
 	"log"
 	"strconv"
@@ -16,8 +16,12 @@ func NewEmployeeRepository(db *sqlx.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Employee, error) {
-	baseQuery := "SELECT * FROM employees WHERE 1=1"
+func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*dto.Employee, error) {
+	log.Printf("repo", employeeRequest)
+	limit := employeeRequest.Limit
+	offset := employeeRequest.Offset
+	
+	baseQuery := fmt.Sprintf("SELECT * FROM employees WHERE 1=1 LIMIT %d OFFSET %d", limit, offset)
 	var args []interface{}
 	var argIndex int
 
@@ -56,8 +60,9 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 		args = append(args, employeeImageURI)
 	}
 
-	employees := make([]*models.Employee, 0)
+	employees := make([]*dto.Employee, 0)
 
+	log.Println(baseQuery)
 	rows, err := r.db.Queryx(baseQuery, args...)
 	if err != nil {
 		log.Println("error query GetAll Employee")
@@ -65,8 +70,9 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	}
 	
 	for rows.Next() {
-		var employee models.Employee
+		var employee dto.Employee
 		err := rows.StructScan(&employee)
+		log.Println(employee)
 		if err != nil {
 			log.Println("error query select")
 			return nil, err

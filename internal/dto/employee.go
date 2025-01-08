@@ -1,9 +1,5 @@
 package dto
 
-import (
-	"github.com/fatjan/gogomanager/internal/models"
-)
-
 type GenderType string
 
 const (
@@ -13,7 +9,7 @@ const (
 
 type Employee struct {
 	ID 				int 
-	IDNumber   		string `json:"identityNumber"`
+	IdentityNumber  string `json:"identityNumber"`
     Name 			string `json:"name"`
 	Gender 			GenderType `json:"gender"`
 	DepartmentID 	string `json:"departmentId"`
@@ -26,14 +22,14 @@ type EmployeeRequest struct {
 	Gender 				GenderType
 	DepartmentID 		string
 	EmployeeImageURI 	string 
-	Limit 				string 
-	Offset 				string
+	Limit 				int
+	Offset 				int
 }
 
 type EmployeeResponse struct {
-	IDNumber   			string `json:"departmentId"`
+	IdentityNumber   	string `json:"identityNumber"`
     Name 				string `json:"name"`
-	Gender 				models.GenderType `json:"gender"`
+	Gender 				string `json:"gender"`
 	DepartmentID 		string `json:"departmentId"`
 	EmployeeImageURI 	string `json:"employeeImageUri"`
 }

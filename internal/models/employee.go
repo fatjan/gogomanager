@@ -8,10 +8,11 @@ const (
 )
 
 type Employee struct {
-	ID 				int 
-	IDNumber   		string `json:"id"`
-    Name 			string `json:"name"`
-	Gender 			GenderType `json:"gender"`
-	DepartmentID 	string `json:"departmentId"`
-	EmployeeImageURI 	string `json:"employeeImageUri"`
+	ID 					int 
+	IdentityNumber   	string  `db:"identity_number"`
+    Name 				string 
+	Gender 				string 
+	DepartmentID 		string  `db:"department_id"`
+	ManagerID			int 	`db:"manager_id"`
+	EmployeeImageURI 	string  `db:"employee_image_uri"`
 }
