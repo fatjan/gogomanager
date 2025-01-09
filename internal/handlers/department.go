@@ -105,8 +105,14 @@ func (r *departmentHandler) Index(ginCtx *gin.Context) {
 		delivery.Failed(ginCtx, http.StatusBadRequest, err)
 		return
 	}
-	// TODO: set literal value of managerID for now, but later should use value from authentication process
-	req.ManagerID = 1
+
+	managerId, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
+		return
+	}
+	id := managerId.(int)
+	req.ManagerID = id
 
 	response, err := r.departmentUseCase.GetAllDepartment(ginCtx.Request.Context(), req)
 	if err != nil {
