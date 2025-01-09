@@ -6,4 +6,5 @@ import (
 
 type UseCase interface {
 	GetAllEmployee(*dto.EmployeeRequest) (*dto.GetAllEmployeeResponse, error)
+	PostEmployee(*dto.EmployeeRequest, int) (*dto.EmployeeResponse, error)
 }
