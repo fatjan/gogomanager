@@ -39,13 +39,7 @@ func (u *useCase) UpdateUser(ctx context.Context, userID int, request *dto.UserP
 	}
 
 	// Create update request with current values as defaults
-	updateRequest := &dto.UserPatchRequest{
-		Email:           &user.Email,
-		Name:            &user.Name,
-		UserImageUri:    &user.UserImageUri,
-		CompanyName:     &user.CompanyName,
-		CompanyImageUri: &user.CompanyImageUri,
-	}
+	updateRequest := &dto.UserPatchRequest{}
 
 	// Update fields if provided in request
 	if request != nil {
@@ -53,26 +47,31 @@ func (u *useCase) UpdateUser(ctx context.Context, userID int, request *dto.UserP
 		// check key request email
 		if request.Email != nil {
 			updateRequest.Email = request.Email
+			user.Email = *request.Email
 		}
 
 		// check key request name
 		if request.Name != nil {
 			updateRequest.Name = request.Name
+			user.Name = *request.Name
 		}
 
 		// check key request UserImageUri
 		if request.UserImageUri != nil {
 			updateRequest.UserImageUri = request.UserImageUri
+			user.UserImageUri = *request.UserImageUri
 		}
 
 		// check key request CompanyName
 		if request.CompanyName != nil {
 			updateRequest.CompanyName = request.CompanyName
+			user.CompanyName = *request.CompanyName
 		}
 
 		// check key request CompanyImageUri
 		if request.CompanyImageUri != nil {
 			updateRequest.CompanyImageUri = request.CompanyImageUri
+			user.CompanyImageUri = *request.CompanyImageUri
 		}
 
 	}
@@ -85,10 +84,10 @@ func (u *useCase) UpdateUser(ctx context.Context, userID int, request *dto.UserP
 
 	// Return new user data
 	return &dto.User{
-		Email:           *updateRequest.Email,
-		Name:            *updateRequest.Name,
-		UserImageUri:    *updateRequest.UserImageUri,
-		CompanyName:     *updateRequest.CompanyName,
-		CompanyImageUri: *updateRequest.CompanyImageUri,
+		Email:           user.Email,
+		Name:            user.Name,
+		UserImageUri:    user.UserImageUri,
+		CompanyName:     user.CompanyName,
+		CompanyImageUri: user.CompanyImageUri,
 	}, nil
 }

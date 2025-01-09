@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/fatjan/gogomanager/internal/dto"
 	"log"
+	"strings"
 
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -54,11 +56,52 @@ func (r *repository) GetUser(id int) (*models.User, error) {
 }
 func (r *repository) Update(_ context.Context, userID int, request *dto.UserPatchRequest) error {
 
-	result, err := r.db.Exec(
-		"UPDATE managers SET email = $1,name = $2,user_image_uri = $3, company_name = $4, company_image_uri = $5 WHERE id = $6",
-		request.Email, request.Name, request.UserImageUri, request.CompanyName, request.CompanyImageUri,
-		userID,
-	)
+	baseQuery := `UPDATE managers SET `
+	var setClauses []string
+	var args []interface{}
+	var argIndex int = 1
+
+	if request != nil {
+		if request.Email != nil {
+			setClauses = append(setClauses, fmt.Sprintf(`email = $%d`, argIndex))
+			args = append(args, *request.Email)
+			argIndex++
+		}
+
+		if request.Name != nil {
+			setClauses = append(setClauses, fmt.Sprintf(`name = $%d`, argIndex))
+			args = append(args, *request.Name)
+			argIndex++
+		}
+
+		if request.UserImageUri != nil {
+			setClauses = append(setClauses, fmt.Sprintf(`user_image_uri = $%d`, argIndex))
+			args = append(args, *request.UserImageUri)
+			argIndex++
+		}
+
+		if request.CompanyName != nil {
+			setClauses = append(setClauses, fmt.Sprintf(`company_name = $%d`, argIndex))
+			args = append(args, *request.CompanyName)
+			argIndex++
+		}
+
+		if request.CompanyImageUri != nil {
+			setClauses = append(setClauses, fmt.Sprintf(`company_image_uri = $%d`, argIndex))
+			args = append(args, *request.CompanyImageUri)
+			argIndex++
+		}
+	}
+
+	if len(setClauses) == 0 {
+		return errors.New("no fields to update")
+	}
+
+	baseQuery += strings.Join(setClauses, ", ")
+	baseQuery += fmt.Sprintf(` WHERE id = $%d`, argIndex)
+	args = append(args, userID)
+
+	result, err := r.db.Exec(baseQuery, args...)
 	if err != nil {
 		return err
 	}
