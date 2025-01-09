@@ -40,30 +40,41 @@ func (u *useCase) UpdateUser(ctx context.Context, userID int, request *dto.UserP
 
 	// Create update request with current values as defaults
 	updateRequest := &dto.UserPatchRequest{
-		Email:           user.Email,
-		Name:            user.Name,
-		UserImageUri:    user.UserImageUri,
-		CompanyName:     user.CompanyName,
-		CompanyImageUri: user.CompanyImageUri,
+		Email:           &user.Email,
+		Name:            &user.Name,
+		UserImageUri:    &user.UserImageUri,
+		CompanyName:     &user.CompanyName,
+		CompanyImageUri: &user.CompanyImageUri,
 	}
 
 	// Update fields if provided in request
 	if request != nil {
-		if request.Email != "" {
+
+		// check key request email
+		if request.Email != nil {
 			updateRequest.Email = request.Email
 		}
-		if request.Name != "" {
+
+		// check key request name
+		if request.Name != nil {
 			updateRequest.Name = request.Name
 		}
-		if request.UserImageUri != "" {
+
+		// check key request UserImageUri
+		if request.UserImageUri != nil {
 			updateRequest.UserImageUri = request.UserImageUri
 		}
-		if request.CompanyName != "" {
+
+		// check key request CompanyName
+		if request.CompanyName != nil {
 			updateRequest.CompanyName = request.CompanyName
 		}
-		if request.CompanyImageUri != "" {
+
+		// check key request CompanyImageUri
+		if request.CompanyImageUri != nil {
 			updateRequest.CompanyImageUri = request.CompanyImageUri
 		}
+
 	}
 
 	// Update user in repository
@@ -74,10 +85,10 @@ func (u *useCase) UpdateUser(ctx context.Context, userID int, request *dto.UserP
 
 	// Return new user data
 	return &dto.User{
-		Email:           updateRequest.Email,
-		Name:            updateRequest.Name,
-		UserImageUri:    updateRequest.UserImageUri,
-		CompanyName:     updateRequest.CompanyName,
-		CompanyImageUri: updateRequest.CompanyImageUri,
+		Email:           *updateRequest.Email,
+		Name:            *updateRequest.Name,
+		UserImageUri:    *updateRequest.UserImageUri,
+		CompanyName:     *updateRequest.CompanyName,
+		CompanyImageUri: *updateRequest.CompanyImageUri,
 	}, nil
 }

@@ -50,6 +50,13 @@ func (r *userHandler) Update(ginCtx *gin.Context) {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
+
+	if err := userRequest.Validate(); err != nil {
+		log.Println(err.Error())
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	userResponse, err := r.userUseCase.UpdateUser(ginCtx.Request.Context(), userIDInt, &userRequest)
 	if err != nil {
 		statusRes := http.StatusInternalServerError
