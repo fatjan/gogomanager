@@ -71,6 +71,10 @@ func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployee
 		}
 	}
 
+	if req.IdentityNumber != "" {
+		identityNumber = req.IdentityNumber
+	}
+
 	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(identityNumber, departmentID)
 	if err != nil {
 		return nil, err
