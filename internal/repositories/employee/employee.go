@@ -151,23 +151,23 @@ func (r *repository) UpdateEmployee(identityNumber string, request *models.Updat
 	return &employee, nil
 }
 
-func (r *repository) FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error) {
+func (r *repository) FindByIdentityNumberWithDepartmentID(identityNumber string, department int) (*models.IdentityNumberEmployee, error) {
 	employee := &models.IdentityNumberEmployee{}
 
 	err := r.db.QueryRow(`
         SELECT identity_number
         FROM employees 
-        WHERE identity_number = $1`,
-		identityNumber,
+        WHERE identity_number = $1 and department_id = $2`,
+		identityNumber, department,
 	).Scan(
 		&employee.IdentityNumber,
 	)
 
-	if err == sql.ErrNoRows {
-		return nil, errors.New("employee not found")
-	}
-
 	if err != nil {
+		if err == sql.ErrNoRows {
+			employee.IdentityNumber = ""
+			return employee, nil
+		}
 		return nil, err
 	}
 

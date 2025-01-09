@@ -6,15 +6,20 @@ import (
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
+	"github.com/fatjan/gogomanager/internal/repositories/department"
 	"github.com/fatjan/gogomanager/internal/repositories/employee"
 )
 
 type useCase struct {
-	employeeRepository employee.Repository
+	employeeRepository  employee.Repository
+	deparmentRepository department.Repository
 }
 
-func NewUseCase(employeeRepository employee.Repository) UseCase {
-	return &useCase{employeeRepository: employeeRepository}
+func NewUseCase(employeeRepository employee.Repository, departmentRepository department.Repository) UseCase {
+	return &useCase{
+		employeeRepository:  employeeRepository,
+		deparmentRepository: departmentRepository,
+	}
 }
 
 func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.GetAllEmployeeResponse, error) {
@@ -50,11 +55,21 @@ func (uc *useCase) DeleteByIdentityNumber(identityNumber string) error {
 }
 
 func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error) {
-	employee, err := uc.employeeRepository.FindByIdentityNumber(identityNumber)
+	departmentID, err := strconv.Atoi(req.DepartmentID)
 	if err != nil {
-		if err.Error() == "employee not found" {
+		return nil, errors.New("invalid department id format")
+	}
+
+	_, err = uc.deparmentRepository.FindOneByID(departmentID)
+	if err != nil {
+		if err.Error() == "department not found" {
 			return nil, err
 		}
+	}
+
+	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(req.IdentityNumber, departmentID)
+	if err != nil {
+		return nil, err
 	}
 
 	if employee.IdentityNumber == req.IdentityNumber {
@@ -63,11 +78,6 @@ func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployee
 
 	if req.IdentityNumber == "" {
 		return nil, errors.New("identity number is required")
-	}
-
-	departmentID, err := strconv.Atoi(req.DepartmentID)
-	if err != nil {
-		return nil, errors.New("invalid department id format")
 	}
 
 	employees := models.UpdateEmployee{

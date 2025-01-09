@@ -105,25 +105,24 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 	response, err := r.employeeUseCase.UpdateEmployee(identityNumber, &req)
 
 	if err != nil {
-		if err.Error() == "employee not found" {
+		switch err.Error() {
+		case "employee not found":
 			ginCtx.JSON(http.StatusNotFound, gin.H{"error": "identity number not found"})
 			return
-		}
-
-		if err.Error() == "duplicate identity number" {
+		case "duplicate identity number":
 			ginCtx.JSON(http.StatusConflict, gin.H{"error": "identity number already exists"})
 			return
-		}
-
-		if err.Error() == "identity number is required" {
+		case "identity number is required":
 			ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "identity number is required"})
 			return
+		case "department not found":
+			ginCtx.JSON(http.StatusNotFound, gin.H{"error": "department not found"})
+			return
+		default:
+			ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
 		}
-
-		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-		return
 	}
-
 	ginCtx.JSON(http.StatusOK, response)
 }
 

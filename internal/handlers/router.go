@@ -42,7 +42,7 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	departmentRouter.DELETE("/:id", departmentHandler.Delete)
 
 	employeeRepository := employeeRepository.NewEmployeeRepository(db)
-	employeeUseCase := employeeUseCase.NewUseCase(employeeRepository)
+	employeeUseCase := employeeUseCase.NewUseCase(employeeRepository, departmentRepository)
 	employeeHandler := NewEmployeeHandler(employeeUseCase)
 
 	employeeRouter := v1.Group("employee")

@@ -1,10 +1,12 @@
 package department
 
 import (
+	"database/sql"
 	"errors"
+	"log"
+
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
-	"log"
 )
 
 type repository struct {
@@ -35,8 +37,11 @@ func (r *repository) FindOneByID(id int) (*models.Department, error) {
 		id,
 	).Scan(&department.ID, &department.Name, &department.ManagerID, &department.CreatedAt, &department.UpdatedAt)
 
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return nil, errors.New("department not found")
+	}
 
+	if err != nil {
 		return nil, err
 	}
 
