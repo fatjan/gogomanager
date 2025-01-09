@@ -1,3 +1,4 @@
+// Package s3uploader provides a simple wrapper around AWS S3 SDK to upload files to S3 bucket.
 package s3uploader
 
 import (
@@ -12,12 +13,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+// Uploader is a struct that contains the AWS S3 client and uploader
 type Uploader struct {
 	client   *s3.Client
 	uploader *manager.Uploader
 	cfg      *Config
 }
 
+// Config is a struct that contains the configuration for the S3 uploader
 type Config struct {
 	BucketName      string
 	AccessKeyID     string
@@ -56,6 +59,10 @@ func NewUploader(cfg *Config) (*Uploader, error) {
 	}, nil
 }
 
+// UploadFile uploads a file to the S3 bucket
+// The key is the path to the file in the bucket
+// The file is the multipart file from the request
+// It returns an error if the upload failed
 func (u *Uploader) UploadFile(file multipart.File, key string) error {
 	_, err := u.uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket: &u.cfg.BucketName,
@@ -66,12 +73,22 @@ func (u *Uploader) UploadFile(file multipart.File, key string) error {
 	return err
 }
 
+// GetObjectPublicUrls generates a public URL for the object in the S3 bucket
+// The key is the path to the file in the bucket
+// It returns the public URL
+// The URL is in the format based on this reference:
+// https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html#virtual-hosted-style-access
 func (u *Uploader) GetObjectPublicUrls(key string) string {
 	publicUrl := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", u.cfg.BucketName, u.cfg.Region, key)
 
 	return publicUrl
 }
 
+// GetObjectPresignedUrl generates a presigned URL for the object in the S3 bucket
+// The key is the path to the file in the bucket
+// It returns the presigned URL
+// The URL is in the format based on this reference:
+// https://docs.aws.amazon.com/AmazonS3/latest/API/s3_example_s3_Scenario_PresignedUrl_section.html
 func (u *Uploader) GetObjectPresignedUrl(key string) (string, error) {
 	presign, err := s3.NewPresignClient(u.client).PresignGetObject(context.TODO(),
 		&s3.GetObjectInput{
