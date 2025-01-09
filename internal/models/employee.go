@@ -31,5 +31,9 @@ type UpdateEmployee struct {
 }
 
 type IdentityNumberEmployee struct {
-	IdentityNumber string
+	IdentityNumber   string
+	Name             string
+	EmployeeImageURI string
+	Gender           GenderType
+	DepartmentID     int
 }

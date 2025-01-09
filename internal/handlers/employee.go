@@ -112,9 +112,6 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 		case "duplicate identity number":
 			ginCtx.JSON(http.StatusConflict, gin.H{"error": "identity number already exists"})
 			return
-		case "identity number is required":
-			ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "identity number is required"})
-			return
 		case "department not found":
 			ginCtx.JSON(http.StatusNotFound, gin.H{"error": "department not found"})
 			return

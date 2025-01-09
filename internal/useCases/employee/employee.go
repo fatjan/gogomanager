@@ -55,29 +55,29 @@ func (uc *useCase) DeleteByIdentityNumber(identityNumber string) error {
 }
 
 func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error) {
-	departmentID, err := strconv.Atoi(req.DepartmentID)
-	if err != nil {
-		return nil, errors.New("invalid department id format")
-	}
+	var departmentID int = 0
 
-	_, err = uc.deparmentRepository.FindOneByID(departmentID)
-	if err != nil {
-		if err.Error() == "department not found" {
-			return nil, err
+	if req.DepartmentID != "" {
+		departmentID, err := strconv.Atoi(req.DepartmentID)
+		if err != nil {
+			return nil, errors.New("invalid department id format")
+		}
+
+		_, err = uc.deparmentRepository.FindOneByID(departmentID)
+		if err != nil {
+			if err.Error() == "department not found" {
+				return nil, err
+			}
 		}
 	}
 
-	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(req.IdentityNumber, departmentID)
+	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(identityNumber, departmentID)
 	if err != nil {
 		return nil, err
 	}
 
 	if employee.IdentityNumber == req.IdentityNumber {
 		return nil, errors.New("duplicate identity number")
-	}
-
-	if req.IdentityNumber == "" {
-		return nil, errors.New("identity number is required")
 	}
 
 	employees := models.UpdateEmployee{

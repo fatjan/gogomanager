@@ -12,4 +12,5 @@ type Repository interface {
 	FindByIdentityNumberWithDepartmentID(identityNumber string, department int) (*models.IdentityNumberEmployee, error)
 	CheckDuplicateIdentityNumber(currentIdentityNumber string) (string, error)
 	Post(*models.Employee) (*models.Employee, error)
+	FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error)
 }

@@ -43,7 +43,7 @@ type UpdateEmployeeRequest struct {
 	Name             string     `json:"name" validate:"min=5,max=33"`
 	EmployeeImageURI string     `json:"employeeImageUri"`
 	Gender           GenderType `json:"gender"`
-	DepartmentID     string     `json:"departmentId" binding:"required"`
+	DepartmentID     string     `json:"departmentId"`
 }
 
 type UpdateEmployeeResponse struct {

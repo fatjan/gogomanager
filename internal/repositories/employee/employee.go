@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
@@ -108,31 +109,60 @@ func (r *repository) DeleteByIdentityNumber(identityNumber string) error {
 func (r *repository) UpdateEmployee(identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error) {
 	var employee models.UpdateEmployee
 
-	err := r.db.QueryRow(`
-			UPDATE employees
-			SET 
-					identity_number = $1,
-					name = $2,
-					employee_image_uri = $3,
-					gender = $4,
-					department_id = $5,
-					created_at = current_timestamp,
-					updated_at = current_timestamp
-			WHERE identity_number = $6
-			RETURNING 
-					id,
-					identity_number,
-					name,
-					employee_image_uri,
-					gender,
-					department_id`,
-		request.IdentityNumber,
-		request.Name,
-		request.EmployeeImageURI,
-		request.Gender,
-		request.DepartmentID,
-		identityNumber,
-	).Scan(
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	paramCount := 1
+
+	if request.IdentityNumber != "" {
+		setValues = append(setValues, fmt.Sprintf("identity_number = $%d", paramCount))
+		args = append(args, request.IdentityNumber)
+		paramCount++
+	}
+	if request.Name != "" {
+		setValues = append(setValues, fmt.Sprintf("name = $%d", paramCount))
+		args = append(args, request.Name)
+		paramCount++
+	}
+	if request.EmployeeImageURI != "" {
+		setValues = append(setValues, fmt.Sprintf("employee_image_uri = $%d", paramCount))
+		args = append(args, request.EmployeeImageURI)
+		paramCount++
+	}
+	if request.Gender != "" {
+		setValues = append(setValues, fmt.Sprintf("gender = $%d", paramCount))
+		args = append(args, request.Gender)
+		paramCount++
+	}
+	if request.DepartmentID != 0 {
+		setValues = append(setValues, fmt.Sprintf("department_id = $%d", paramCount))
+		args = append(args, request.DepartmentID)
+		paramCount++
+	}
+
+	setValues = append(setValues, "created_at = current_timestamp", "updated_at = current_timestamp")
+
+	if len(setValues) == 2 {
+		return nil, errors.New("no fields to update")
+	}
+
+	query := fmt.Sprintf(`
+				UPDATE employees
+				SET %s
+				WHERE identity_number = $%d
+				RETURNING 
+						id,
+						identity_number,
+						name,
+						employee_image_uri,
+						gender,
+						department_id`,
+		strings.Join(setValues, ", "),
+		paramCount,
+	)
+
+	args = append(args, identityNumber)
+
+	err := r.db.QueryRow(query, args...).Scan(
 		&employee.ID,
 		&employee.IdentityNumber,
 		&employee.Name,
@@ -150,17 +180,25 @@ func (r *repository) UpdateEmployee(identityNumber string, request *models.Updat
 
 	return &employee, nil
 }
-
 func (r *repository) FindByIdentityNumberWithDepartmentID(identityNumber string, department int) (*models.IdentityNumberEmployee, error) {
 	employee := &models.IdentityNumberEmployee{}
 
-	err := r.db.QueryRow(`
-        SELECT identity_number
+	query := `SELECT identity_number, name, employee_image_uri, gender, department_id
         FROM employees 
-        WHERE identity_number = $1 and department_id = $2`,
-		identityNumber, department,
-	).Scan(
+        WHERE identity_number = $1`
+	args := []interface{}{identityNumber}
+
+	if department != 0 {
+		query += ` and department_id = $2`
+		args = append(args, department)
+	}
+
+	err := r.db.QueryRow(query, args...).Scan(
 		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageURI,
+		&employee.Gender,
+		&employee.DepartmentID,
 	)
 
 	if err != nil {
@@ -173,7 +211,6 @@ func (r *repository) FindByIdentityNumberWithDepartmentID(identityNumber string,
 
 	return employee, nil
 }
-
 func (r *repository) CheckDuplicateIdentityNumber(newIdentityNumber string) (string, error) {
 	var result string
 	err := r.db.QueryRow(`
@@ -222,4 +259,27 @@ func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
 	}
 
 	return employee, err
+}
+
+func (r *repository) FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error) {
+	employee := &models.IdentityNumberEmployee{}
+
+	err := r.db.QueryRow(`
+        SELECT identity_number, name, employee_image_uri, gender, department_id
+        FROM employees 
+        WHERE identity_number = $1`,
+		identityNumber,
+	).Scan(
+		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageURI,
+		&employee.Gender,
+		&employee.DepartmentID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return employee, nil
 }
