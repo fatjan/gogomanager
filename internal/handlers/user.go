@@ -43,7 +43,12 @@ func (r *userHandler) Update(ginCtx *gin.Context) {
 
 	userID := ginCtx.Param("id")
 
-	userIDInt, _ := strconv.Atoi(userID)
+	userIDInt, err := strconv.Atoi(userID)
+	if err != nil {
+		log.Println(err.Error())
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid get id"})
+		return
+	}
 
 	if err := ginCtx.ShouldBindJSON(&userRequest); err != nil {
 		log.Println(err.Error())

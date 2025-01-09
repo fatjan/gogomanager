@@ -54,7 +54,7 @@ func (r *repository) GetUser(id int) (*models.User, error) {
 
 	return user, nil
 }
-func (r *repository) Update(_ context.Context, userID int, request *dto.UserPatchRequest) error {
+func (r *repository) Update(ctx context.Context, userID int, request *dto.UserPatchRequest) error {
 
 	baseQuery := `UPDATE managers SET `
 	var setClauses []string
@@ -101,7 +101,7 @@ func (r *repository) Update(_ context.Context, userID int, request *dto.UserPatc
 	baseQuery += fmt.Sprintf(` WHERE id = $%d`, argIndex)
 	args = append(args, userID)
 
-	result, err := r.db.Exec(baseQuery, args...)
+	result, err := r.db.ExecContext(ctx, baseQuery, args...)
 	if err != nil {
 		return err
 	}
