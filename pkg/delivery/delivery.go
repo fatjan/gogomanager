@@ -4,6 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SuccessNoContent(c *gin.Context, httpCode int) {
+	c.Status(httpCode)
+}
+
 func Success(c *gin.Context, httpCode int, data any) {
 	c.JSON(httpCode, data)
 }

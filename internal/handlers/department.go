@@ -96,7 +96,7 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 		return
 	}
 
-	delivery.Success(ginCtx, http.StatusOK, nil)
+	delivery.SuccessNoContent(ginCtx, http.StatusOK)
 }
 
 func (r *departmentHandler) Index(ginCtx *gin.Context) {
