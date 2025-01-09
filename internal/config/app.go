@@ -34,3 +34,12 @@ func getAppPort() string {
 
 	return fmt.Sprintf(":%s", port)
 }
+
+func getJwtKey() string {
+	key := os.Getenv("JWT_KEY")
+	if key == "" {
+		key = "gogoManager!123"
+	}
+
+	return key
+}
