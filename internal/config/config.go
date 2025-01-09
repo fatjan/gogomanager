@@ -13,7 +13,6 @@ type Config struct {
 	App    app
 	DB     db
 	TestDB db
-	JwtKey string
 }
 
 func LoadConfig() (*Config, error) {
@@ -32,7 +31,6 @@ func LoadConfig() (*Config, error) {
 		App:    loadApplicationConfig(),
 		DB:     loadDatabaseConfig(),
 		TestDB: loadDatabaseTestConfig(),
-		JwtKey: getJwtKey(),
 	}, nil
 }
 
