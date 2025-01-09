@@ -17,11 +17,15 @@ type userHandler struct {
 }
 
 func (r *userHandler) Get(ginCtx *gin.Context) {
-	var userRequest dto.UserRequest
-
-	if err := ginCtx.BindJSON(&userRequest); err != nil {
-		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+	managerId, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
 		return
+	}
+
+	id := managerId.(int)
+	userRequest := dto.UserRequest{
+		UserID: id,
 	}
 
 	userResponse, err := r.userUseCase.GetUser(&userRequest)
