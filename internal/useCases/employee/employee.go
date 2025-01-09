@@ -35,14 +35,14 @@ func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.Ge
 	return &dto.GetAllEmployeeResponse{Employees: allEmployee}, nil
 }
 
-func (uc *useCase) PostEmployee(employeeRequest *dto.EmployeeRequest) (*dto.EmployeeResponse, error) {
+func (uc *useCase) PostEmployee(employeeRequest *dto.EmployeeRequest, managerId int) (*dto.EmployeeResponse, error) {
 	newEmployee := &models.Employee{
 		Name:             employeeRequest.Name,
 		IdentityNumber:   employeeRequest.IdentityNumber,
 		Gender:           string(employeeRequest.Gender),
 		DepartmentID:     employeeRequest.DepartmentID,
 		EmployeeImageURI: employeeRequest.EmployeeImageURI,
-		ManagerID:        1, // Hardcoded for now since we don't have the auth feature yet
+		ManagerID:        managerId,
 	}
 
 	createdEmployee, err := uc.employeeRepository.Post(newEmployee)

@@ -74,7 +74,8 @@ func (r *employeeHandler) Post(ginCtx *gin.Context) {
 		return
 	}
 
-	employeeResponse, err := r.employeeUseCase.PostEmployee(&employeeRequest)
+	managerId := ginCtx.GetInt("manager_id")
+	employeeResponse, err := r.employeeUseCase.PostEmployee(&employeeRequest, managerId)
 	if err != nil {
 		if err.Error() == "duplicate identity number" {
 			ginCtx.JSON(http.StatusConflict, gin.H{"error": "Duplicate identity number"})
