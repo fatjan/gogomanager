@@ -12,6 +12,7 @@ import (
 type EmployeeHandler interface {
 	Get(ginCtx *gin.Context)
 	Delete(ginCtx *gin.Context)
+	Update(ginCtx *gin.Context)
 }
 
 type employeeHandler struct {
@@ -86,6 +87,40 @@ func (r *employeeHandler) Delete(ginCtx *gin.Context) {
 
 	ginCtx.JSON(http.StatusOK, gin.H{"message": "employee deleted successfully"})
 }
+
+func (r *employeeHandler) Update(ginCtx *gin.Context) {
+	identityNumber := ginCtx.Param("identityNumber")
+	if identityNumber == "" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "identity number is required"})
+		return
+	}
+
+	var req dto.UpdateEmployeeRequest
+	if err := ginCtx.ShouldBindJSON(&req); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "validation error"})
+		return
+	}
+
+	response, err := r.employeeUseCase.UpdateEmployee(identityNumber, &req)
+
+	if err != nil {
+		if err.Error() == "employee not found" {
+			ginCtx.JSON(http.StatusNotFound, gin.H{"error": "identity number not found"})
+			return
+		}
+
+		if err.Error() == "duplicate identity number" {
+			ginCtx.JSON(http.StatusConflict, gin.H{"error": "identity number already exists"})
+			return
+		}
+
+		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, response)
+}
+
 func NewEmployeeHandler(employeeUseCase employee.UseCase) EmployeeHandler {
 	return &employeeHandler{employeeUseCase: employeeUseCase}
 }
