@@ -91,3 +91,25 @@ func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployee
 
 	return response, nil
 }
+
+func (uc *useCase) PostEmployee(employeeRequest *dto.EmployeeRequest, managerId int) (*dto.EmployeeResponse, error) {
+	newEmployee := &models.Employee{
+		Name:             employeeRequest.Name,
+		IdentityNumber:   employeeRequest.IdentityNumber,
+		Gender:           string(employeeRequest.Gender),
+		DepartmentID:     employeeRequest.DepartmentID,
+		EmployeeImageURI: employeeRequest.EmployeeImageURI,
+		ManagerID:        managerId,
+	}
+
+	createdEmployee, err := uc.employeeRepository.Post(newEmployee)
+	employeeResponse := &dto.EmployeeResponse{
+		Name:             createdEmployee.Name,
+		IdentityNumber:   createdEmployee.IdentityNumber,
+		Gender:           createdEmployee.Gender,
+		DepartmentID:     createdEmployee.DepartmentID,
+		EmployeeImageURI: createdEmployee.EmployeeImageURI,
+	}
+
+	return employeeResponse, nil
+}

@@ -13,6 +13,7 @@ type EmployeeHandler interface {
 	Get(ginCtx *gin.Context)
 	Delete(ginCtx *gin.Context)
 	Update(ginCtx *gin.Context)
+	Post(ginCtx *gin.Context)
 }
 
 type employeeHandler struct {
@@ -119,6 +120,27 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 	}
 
 	ginCtx.JSON(http.StatusOK, response)
+}
+
+func (r *employeeHandler) Post(ginCtx *gin.Context) {
+	var employeeRequest dto.EmployeeRequest
+	if err := ginCtx.BindJSON(&employeeRequest); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	managerId := ginCtx.GetInt("manager_id")
+	employeeResponse, err := r.employeeUseCase.PostEmployee(&employeeRequest, managerId)
+	if err != nil {
+		if err.Error() == "duplicate identity number" {
+			ginCtx.JSON(http.StatusConflict, gin.H{"error": "Duplicate identity number"})
+			return
+		}
+		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ginCtx.JSON(http.StatusOK, employeeResponse)
 }
 
 func NewEmployeeHandler(employeeUseCase employee.UseCase) EmployeeHandler {

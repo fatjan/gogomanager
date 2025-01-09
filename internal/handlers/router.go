@@ -50,6 +50,7 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	employeeRouter.GET("/", employeeHandler.Get)
 	employeeRouter.DELETE("/:identityNumber", employeeHandler.Delete)
 	employeeRouter.PATCH("/:identityNumber", employeeHandler.Update)
+	employeeRouter.POST("/", employeeHandler.Post)
 
 	authRepository := authRepository.NewAuthRepository(db)
 	authUseCase := authUseCase.NewUseCase(authRepository, cfgData)

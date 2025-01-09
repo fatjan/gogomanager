@@ -11,4 +11,5 @@ type Repository interface {
 	UpdateEmployee(identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error)
 	FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error)
 	CheckDuplicateIdentityNumber(currentIdentityNumber string) (string, error)
+	Post(*models.Employee) (*models.Employee, error)
 }
