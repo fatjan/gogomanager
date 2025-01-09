@@ -103,6 +103,10 @@ func (uc *useCase) PostEmployee(employeeRequest *dto.EmployeeRequest, managerId 
 	}
 
 	createdEmployee, err := uc.employeeRepository.Post(newEmployee)
+	if err != nil {
+		return nil, err
+	}
+	
 	employeeResponse := &dto.EmployeeResponse{
 		Name:             createdEmployee.Name,
 		IdentityNumber:   createdEmployee.IdentityNumber,
