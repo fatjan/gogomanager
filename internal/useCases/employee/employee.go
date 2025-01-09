@@ -61,6 +61,10 @@ func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployee
 		return nil, errors.New("duplicate identity number")
 	}
 
+	if req.IdentityNumber == "" {
+		return nil, errors.New("identity number is required")
+	}
+
 	departmentID, err := strconv.Atoi(req.DepartmentID)
 	if err != nil {
 		return nil, errors.New("invalid department id format")
@@ -106,7 +110,7 @@ func (uc *useCase) PostEmployee(employeeRequest *dto.EmployeeRequest, managerId 
 	if err != nil {
 		return nil, err
 	}
-	
+
 	employeeResponse := &dto.EmployeeResponse{
 		Name:             createdEmployee.Name,
 		IdentityNumber:   createdEmployee.IdentityNumber,

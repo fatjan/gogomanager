@@ -115,6 +115,11 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 			return
 		}
 
+		if err.Error() == "identity number is required" {
+			ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "identity number is required"})
+			return
+		}
+
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
