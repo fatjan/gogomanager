@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -27,8 +28,7 @@ type Config struct {
 	AccessKeySecret string
 	Region          string
 	PresignDuration time.Duration
-	// For testing purpose with Cloudflare R2 only
-	// AccountID string
+	AccountID       string
 }
 
 func NewUploader(cfg *Config) (*Uploader, error) {
@@ -64,10 +64,26 @@ func NewUploader(cfg *Config) (*Uploader, error) {
 // The file is the multipart file from the request
 // It returns an error if the upload failed
 func (u *Uploader) UploadFile(file multipart.File, key string) error {
+	ext := key[strings.LastIndex(key, ".")+1:]
+	contentTypeMap := map[string]string{
+		"jpg":  "image/jpeg",
+		"jpeg": "image/jpeg",
+		"png":  "image/png",
+		"gif":  "image/gif",
+		"pdf":  "application/pdf",
+		"txt":  "text/plain",
+	}
+
+	contentType := contentTypeMap[ext]
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
 	_, err := u.uploader.Upload(context.TODO(), &s3.PutObjectInput{
-		Bucket: &u.cfg.BucketName,
-		Key:    &key,
-		Body:   file,
+		Bucket:      &u.cfg.BucketName,
+		Key:         &key,
+		Body:        file,
+		ContentType: &contentType,
 	})
 
 	return err
