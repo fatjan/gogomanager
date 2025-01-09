@@ -1,7 +1,6 @@
 package employee
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -98,89 +97,4 @@ func (r *repository) DeleteByIdentityNumber(identityNumber string) error {
 	}
 
 	return nil
-}
-
-func (r *repository) UpdateEmployee(identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error) {
-	var employee models.UpdateEmployee
-
-	err := r.db.QueryRow(`
-			UPDATE employees
-			SET 
-					identity_number = $1,
-					name = $2,
-					employee_image_uri = $3,
-					gender = $4,
-					department_id = $5,
-					created_at = current_timestamp,
-					updated_at = current_timestamp
-			WHERE identity_number = $6
-			RETURNING 
-					id,
-					identity_number,
-					name,
-					employee_image_uri,
-					gender,
-					department_id`,
-		request.IdentityNumber,
-		request.Name,
-		request.EmployeeImageURI,
-		request.Gender,
-		request.DepartmentID,
-		identityNumber,
-	).Scan(
-		&employee.ID,
-		&employee.IdentityNumber,
-		&employee.Name,
-		&employee.EmployeeImageURI,
-		&employee.Gender,
-		&employee.DepartmentID,
-	)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("employee not found")
-		}
-		return nil, err
-	}
-
-	return &employee, nil
-}
-
-func (r *repository) FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error) {
-	employee := &models.IdentityNumberEmployee{}
-
-	err := r.db.QueryRow(`
-        SELECT identity_number
-        FROM employees 
-        WHERE identity_number = $1`,
-		identityNumber,
-	).Scan(
-		&employee.IdentityNumber,
-	)
-
-	if err == sql.ErrNoRows {
-		return nil, errors.New("employee not found")
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return employee, nil
-}
-func (r *repository) CheckDuplicateIdentityNumber(newIdentityNumber string) (string, error) {
-	var result string
-	err := r.db.QueryRow(`
-				SELECT identity_number 
-				FROM employees 
-				WHERE identity_number = $1;
-		)`,
-		newIdentityNumber,
-	).Scan(&result)
-
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
 }
