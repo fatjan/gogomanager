@@ -11,6 +11,8 @@ import (
 	duckUseCase "github.com/fatjan/gogomanager/internal/useCases/duck"
 	employeeUseCase "github.com/fatjan/gogomanager/internal/useCases/employee"
 
+	userRepository "github.com/fatjan/gogomanager/internal/repositories/user"
+	userUseCase "github.com/fatjan/gogomanager/internal/useCases/user"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
@@ -47,4 +49,11 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 
 	authRouter := v1.Group("auth")
 	authRouter.POST("/", authHandler.Post)
+
+	userRepository := userRepository.NewUserRepository(db)
+	userUseCase := userUseCase.NewUseCase(userRepository)
+	userHandler := NewUserHandler(userUseCase)
+
+	userRouter := v1.Group("user")
+	userRouter.GET("/", userHandler.Get)
 }
