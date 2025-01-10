@@ -1,15 +1,23 @@
 package dto
 
 type Department struct {
-	ID   int `json:"id"`
-    Name string `json:"name"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 type DepartmentRequest struct {
-    Name string `validate:"required,min=4,max=33"`
+	Name      string `validate:"required,min=4,max=33"`
+	ManagerID int    `json:"-"`
 }
 
 type DepartmentResponse struct {
-    DepartmentID int `json:"departmentId"` 
-    Name         string `json:"name"`
+	DepartmentID string `json:"departmentId"`
+	Name         string `json:"name"`
+}
+
+type GetAllDepartmentRequest struct {
+	Name      string `form:"name"`
+	ManagerID int    `form:"-"`
+
+	PaginationRequest
 }
