@@ -19,7 +19,8 @@ type employeeHandler struct {
 }
 
 func (r *employeeHandler) Get(ginCtx *gin.Context) {
-	var req *dto.GetAllEmployeeRequest
+	var req dto.GetAllEmployeeRequest
+
 	if err := ginCtx.ShouldBindQuery(&req); err != nil {
 		delivery.Failed(ginCtx, http.StatusBadRequest, err)
 		return

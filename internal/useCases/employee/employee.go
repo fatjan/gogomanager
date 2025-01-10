@@ -16,7 +16,7 @@ func NewUseCase(employeeRepository employee.Repository) UseCase {
 	return &useCase{employeeRepository: employeeRepository}
 }
 
-func (uc *useCase) GetAllEmployee(c context.Context, req *dto.GetAllEmployeeRequest) ([]*dto.EmployeeResponse, error) {
+func (uc *useCase) GetAllEmployee(c context.Context, req dto.GetAllEmployeeRequest) ([]*dto.EmployeeResponse, error) {
 	filter := employee.EmployeeFilter{
 		ManagerID: req.ManagerID,
 		Name: req.Name,

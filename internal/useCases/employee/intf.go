@@ -7,6 +7,6 @@ import (
 )
 
 type UseCase interface {
-	GetAllEmployee(context.Context, *dto.GetAllEmployeeRequest) ([]*dto.EmployeeResponse, error)
+	GetAllEmployee(context.Context, dto.GetAllEmployeeRequest) ([]*dto.EmployeeResponse, error)
 	PostEmployee(context.Context, *dto.EmployeeRequest, int) (*dto.EmployeeResponse, error)
 }
