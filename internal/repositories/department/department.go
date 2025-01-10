@@ -24,7 +24,7 @@ func (r *repository) Post(ctx context.Context, department *models.Department) (i
 	var newID int
 	err := r.db.QueryRowContext(ctx,
 		"INSERT INTO departments (name, manager_id) VALUES ($1, $2) RETURNING id",
-		department.Name, 1).Scan(&newID)
+		department.Name, department.ManagerID).Scan(&newID)
 	if err != nil {
 		log.Println("error query")
 		return 0, err

@@ -6,7 +6,8 @@ type Department struct {
 }
 
 type DepartmentRequest struct {
-	Name string `validate:"required,min=4,max=33"`
+	Name      string `validate:"required,min=4,max=33"`
+	ManagerID int    `json:"-"`
 }
 
 type DepartmentResponse struct {

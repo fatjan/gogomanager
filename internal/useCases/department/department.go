@@ -19,7 +19,8 @@ func NewUseCase(departmentRepository department.Repository) UseCase {
 
 func (uc *useCase) PostDepartment(c context.Context, departmentRequest *dto.DepartmentRequest) (*dto.DepartmentResponse, error) {
 	newDepartment := &models.Department{
-		Name: departmentRequest.Name,
+		Name:      departmentRequest.Name,
+		ManagerID: departmentRequest.ManagerID,
 	}
 	departmentId, err := uc.departmentRepository.Post(c, newDepartment)
 	if err != nil {

@@ -32,6 +32,14 @@ func (r *departmentHandler) Post(ginCtx *gin.Context) {
 		return
 	}
 
+	managerId, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
+		return
+	}
+	id := managerId.(int)
+	departmentRequest.ManagerID = id
+
 	departmentResponse, err := r.departmentUseCase.PostDepartment(ginCtx.Request.Context(), &departmentRequest)
 	if err != nil {
 		delivery.Failed(ginCtx, http.StatusInternalServerError, err)
