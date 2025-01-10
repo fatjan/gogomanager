@@ -55,7 +55,7 @@ func (uc *useCase) PostEmployee(c context.Context, employeeRequest *dto.Employee
 		ManagerID:        managerId,
 	}
 
-	createdEmployee, err := uc.employeeRepository.Post(newEmployee)
+	createdEmployee, err := uc.employeeRepository.Post(c, newEmployee)
 	if err != nil {
 		return nil, err
 	}

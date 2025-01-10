@@ -20,5 +20,5 @@ type Repository interface {
 		EmployeeFilter,
 		dto.PaginationRequest,
 	) ([]*models.Employee, error)
-	Post(*models.Employee) (*models.Employee, error)
+	Post(context.Context, *models.Employee) (*models.Employee, error)
 }

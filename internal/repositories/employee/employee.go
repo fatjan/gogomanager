@@ -60,7 +60,7 @@ func (r *repository) GetAll(ctx context.Context, filter EmployeeFilter, page dto
 	whereStr := "WHERE " + strings.Join(whereClause, " AND ")
 
 	query := fmt.Sprintf(`
-					SELECT id, name, manager_id, identity_number, gender, department_id, created_at, updated_at
+					SELECT id, name, manager_id, identity_number, gender, department_id, employee_image_uri, created_at, updated_at
 					FROM employees
 					%s
 					ORDER BY id
@@ -78,7 +78,7 @@ func (r *repository) GetAll(ctx context.Context, filter EmployeeFilter, page dto
 	return employees, nil
 }
 
-func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
+func (r *repository) Post(ctx context.Context, employee *models.Employee) (*models.Employee, error) {
 	query := `
 			INSERT INTO employees (
 				identity_number,
@@ -90,7 +90,9 @@ func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
 			) VALUES ($1, $2, $3, $4, $5, $6)
 	`
 
-	_, err := r.db.Exec(query,
+	_, err := r.db.ExecContext(
+		ctx,
+		query,
 		employee.IdentityNumber,
 		employee.Name,
 		employee.EmployeeImageURI,
