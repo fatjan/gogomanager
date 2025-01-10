@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/useCases/employee"
+	"github.com/fatjan/gogomanager/pkg/delivery"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,41 +19,21 @@ type employeeHandler struct {
 }
 
 func (r *employeeHandler) Get(ginCtx *gin.Context) {
-	limit := ginCtx.DefaultQuery("limit", "5")
-	limitInt, err := strconv.Atoi(limit)
-	if err != nil || limitInt <= 0 {
-		limitInt = 5
-	} else if limitInt > 100 {
-		limitInt = 100 
-	}
-
-	offset := ginCtx.DefaultQuery("offset", "0")
-	offsetInt, err := strconv.Atoi(offset)
-	if err != nil || offsetInt < 0 {
-		offsetInt = 0
-	}
-
-	identityNumber := ginCtx.DefaultQuery("identityNumber", "")
-	name := ginCtx.DefaultQuery("name", "")
-	gender := dto.GenderType(ginCtx.DefaultQuery("gender", ""))
-	departmentID := ginCtx.DefaultQuery("departmentId", "0")
-
-	_, err = strconv.Atoi(departmentID)
-	if err != nil {
-		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid departmentId value"})
+	var req *dto.GetAllEmployeeRequest
+	if err := ginCtx.ShouldBindQuery(&req); err != nil {
+		delivery.Failed(ginCtx, http.StatusBadRequest, err)
 		return
 	}
 
-	employeeRequest := dto.EmployeeRequest{
-		IdentityNumber: identityNumber,
-		Name:           name,
-		Gender:         gender,
-		DepartmentID:   departmentID,
-		Limit:          limitInt,
-		Offset:         offsetInt,
+	managerId, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
+		return
 	}
+	id := managerId.(int)
+	req.ManagerID = id
 
-	employeeResponse, err := r.employeeUseCase.GetAllEmployee(&employeeRequest)
+	employeeResponse, err := r.employeeUseCase.GetAllEmployee(ginCtx.Request.Context(), req)
 	if err != nil {
 		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -70,7 +50,7 @@ func (r *employeeHandler) Post(ginCtx *gin.Context) {
 	}
 
 	managerId := ginCtx.GetInt("manager_id")
-	employeeResponse, err := r.employeeUseCase.PostEmployee(&employeeRequest, managerId)
+	employeeResponse, err := r.employeeUseCase.PostEmployee(ginCtx.Request.Context(), &employeeRequest, managerId)
 	if err != nil {
 		if err.Error() == "duplicate identity number" {
 			ginCtx.JSON(http.StatusConflict, gin.H{"error": "Duplicate identity number"})

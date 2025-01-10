@@ -1,10 +1,12 @@
 package employee
 
 import (
+	"context"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 )
 
 type UseCase interface {
-	GetAllEmployee(*dto.EmployeeRequest) (*dto.GetAllEmployeeResponse, error)
-	PostEmployee(*dto.EmployeeRequest, int) (*dto.EmployeeResponse, error)
+	GetAllEmployee(context.Context, *dto.GetAllEmployeeRequest) ([]*dto.EmployeeResponse, error)
+	PostEmployee(context.Context, *dto.EmployeeRequest, int) (*dto.EmployeeResponse, error)
 }

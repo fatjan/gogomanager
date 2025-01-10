@@ -1,6 +1,8 @@
 package employee
 
 import (
+	"context"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/fatjan/gogomanager/internal/repositories/employee"
@@ -14,8 +16,16 @@ func NewUseCase(employeeRepository employee.Repository) UseCase {
 	return &useCase{employeeRepository: employeeRepository}
 }
 
-func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.GetAllEmployeeResponse, error) {
-	employees, err := uc.employeeRepository.GetAll(employeeRequest)
+func (uc *useCase) GetAllEmployee(c context.Context, req *dto.GetAllEmployeeRequest) ([]*dto.EmployeeResponse, error) {
+	filter := employee.EmployeeFilter{
+		ManagerID: req.ManagerID,
+		Name: req.Name,
+		Gender: req.Gender,
+		IdentityNumber: req.IdentityNumber,
+		DepartmentID: req.DepartmentID,
+	}
+	
+	employees, err := uc.employeeRepository.GetAll(c, filter, req.PaginationRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -32,10 +42,10 @@ func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.Ge
 		allEmployee = append(allEmployee, employeeDto)
 	}
 
-	return &dto.GetAllEmployeeResponse{Employees: allEmployee}, nil
+	return allEmployee, nil
 }
 
-func (uc *useCase) PostEmployee(employeeRequest *dto.EmployeeRequest, managerId int) (*dto.EmployeeResponse, error) {
+func (uc *useCase) PostEmployee(c context.Context, employeeRequest *dto.EmployeeRequest, managerId int) (*dto.EmployeeResponse, error) {
 	newEmployee := &models.Employee{
 		Name:             employeeRequest.Name,
 		IdentityNumber:   employeeRequest.IdentityNumber,
