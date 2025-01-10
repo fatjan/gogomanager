@@ -76,7 +76,7 @@ func (r *employeeHandler) Delete(ginCtx *gin.Context) {
 		return
 	}
 
-	err := r.employeeUseCase.DeleteByIdentityNumber(identityNumber)
+	err := r.employeeUseCase.DeleteByIdentityNumber(ginCtx.Request.Context(), identityNumber)
 	if err != nil {
 		if err.Error() == "employee is not found" {
 			ginCtx.JSON(http.StatusNotFound, gin.H{"error": "identityNumber is not found"})
@@ -102,7 +102,7 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 		return
 	}
 
-	response, err := r.employeeUseCase.UpdateEmployee(identityNumber, &req)
+	response, err := r.employeeUseCase.UpdateEmployee(ginCtx.Request.Context(), identityNumber, &req)
 
 	if err != nil {
 		switch err.Error() {

@@ -1,6 +1,7 @@
 package employee
 
 import (
+	"context"
 	"errors"
 	"strconv"
 
@@ -43,8 +44,8 @@ func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.Ge
 	return &dto.GetAllEmployeeResponse{Employees: allEmployee}, nil
 }
 
-func (uc *useCase) DeleteByIdentityNumber(identityNumber string) error {
-	err := uc.employeeRepository.DeleteByIdentityNumber(identityNumber)
+func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber string) error {
+	err := uc.employeeRepository.DeleteByIdentityNumber(c, identityNumber)
 	if err != nil {
 		if err.Error() == "employee is not found" {
 			return err
@@ -54,7 +55,7 @@ func (uc *useCase) DeleteByIdentityNumber(identityNumber string) error {
 	return nil
 }
 
-func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error) {
+func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error) {
 	var departmentID int = 0
 
 	if req.DepartmentID != "" {
@@ -63,7 +64,7 @@ func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployee
 			return nil, errors.New("invalid department id format")
 		}
 
-		_, err = uc.deparmentRepository.FindOneByID(departmentID)
+		_, err = uc.deparmentRepository.FindOneByID(c, departmentID)
 		if err != nil {
 			if err.Error() == "department not found" {
 				return nil, err
@@ -75,7 +76,7 @@ func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployee
 		identityNumber = req.IdentityNumber
 	}
 
-	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(identityNumber, departmentID)
+	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(c, identityNumber, departmentID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +93,7 @@ func (uc *useCase) UpdateEmployee(identityNumber string, req *dto.UpdateEmployee
 		DepartmentID:     departmentID,
 	}
 
-	updatedEmployee, err := uc.employeeRepository.UpdateEmployee(identityNumber, &employees)
+	updatedEmployee, err := uc.employeeRepository.UpdateEmployee(c, identityNumber, &employees)
 	if err != nil {
 		return nil, err
 	}

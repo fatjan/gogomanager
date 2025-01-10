@@ -1,6 +1,7 @@
 package employee
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -88,8 +89,8 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	return employees, nil
 }
 
-func (r *repository) DeleteByIdentityNumber(identityNumber string) error {
-	result, err := r.db.Exec("DELETE FROM employees WHERE identity_number = $1", identityNumber)
+func (r *repository) DeleteByIdentityNumber(ctx context.Context, identityNumber string) error {
+	result, err := r.db.ExecContext(ctx, "DELETE FROM employees WHERE identity_number = $1", identityNumber)
 	if err != nil {
 		return err
 	}
@@ -106,7 +107,7 @@ func (r *repository) DeleteByIdentityNumber(identityNumber string) error {
 	return nil
 }
 
-func (r *repository) UpdateEmployee(identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error) {
+func (r *repository) UpdateEmployee(ctx context.Context, identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error) {
 	var employee models.UpdateEmployee
 
 	setValues := make([]string, 0)
@@ -162,7 +163,7 @@ func (r *repository) UpdateEmployee(identityNumber string, request *models.Updat
 
 	args = append(args, identityNumber)
 
-	err := r.db.QueryRow(query, args...).Scan(
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(
 		&employee.ID,
 		&employee.IdentityNumber,
 		&employee.Name,
@@ -180,7 +181,7 @@ func (r *repository) UpdateEmployee(identityNumber string, request *models.Updat
 
 	return &employee, nil
 }
-func (r *repository) FindByIdentityNumberWithDepartmentID(identityNumber string, department int) (*models.IdentityNumberEmployee, error) {
+func (r *repository) FindByIdentityNumberWithDepartmentID(ctx context.Context, identityNumber string, department int) (*models.IdentityNumberEmployee, error) {
 	employee := &models.IdentityNumberEmployee{}
 
 	query := `SELECT identity_number, name, employee_image_uri, gender, department_id
@@ -193,7 +194,7 @@ func (r *repository) FindByIdentityNumberWithDepartmentID(identityNumber string,
 		args = append(args, department)
 	}
 
-	err := r.db.QueryRow(query, args...).Scan(
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(
 		&employee.IdentityNumber,
 		&employee.Name,
 		&employee.EmployeeImageURI,
@@ -210,22 +211,6 @@ func (r *repository) FindByIdentityNumberWithDepartmentID(identityNumber string,
 	}
 
 	return employee, nil
-}
-func (r *repository) CheckDuplicateIdentityNumber(newIdentityNumber string) (string, error) {
-	var result string
-	err := r.db.QueryRow(`
-				SELECT identity_number 
-				FROM employees 
-				WHERE identity_number = $1;
-		)`,
-		newIdentityNumber,
-	).Scan(&result)
-
-	if err != nil {
-		return result, err
-	}
-
-	return result, nil
 }
 
 func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
