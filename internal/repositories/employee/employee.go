@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"context"
 	"strings"
 
 	"github.com/fatjan/gogomanager/internal/dto"
