@@ -34,12 +34,14 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	departmentRouter.DELETE("/:id", departmentHandler.Delete)
 
 	employeeRepository := employeeRepository.NewEmployeeRepository(db)
-	employeeUseCase := employeeUseCase.NewUseCase(employeeRepository)
+	employeeUseCase := employeeUseCase.NewUseCase(employeeRepository, departmentRepository)
 	employeeHandler := NewEmployeeHandler(employeeUseCase)
 
 	employeeRouter := v1.Group("employee")
 	employeeRouter.Use(jwtMiddleware)
 	employeeRouter.GET("/", employeeHandler.Get)
+	employeeRouter.DELETE("/:identityNumber", employeeHandler.Delete)
+	employeeRouter.PATCH("/:identityNumber", employeeHandler.Update)
 	employeeRouter.POST("/", employeeHandler.Post)
 
 	authRepository := authRepository.NewAuthRepository(db)

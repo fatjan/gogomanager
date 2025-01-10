@@ -43,3 +43,19 @@ type GetAllEmployeeRequest struct {
 
 	PaginationRequest
 }
+
+type UpdateEmployeeRequest struct {
+	IdentityNumber   string     `json:"identityNumber" validate:"min=5,max=33"`
+	Name             string     `json:"name" validate:"min=5,max=33"`
+	EmployeeImageURI string     `json:"employeeImageUri"`
+	Gender           GenderType `json:"gender"`
+	DepartmentID     string     `json:"departmentId"`
+}
+
+type UpdateEmployeeResponse struct {
+	IdentityNumber   string `json:"identityNumber"`
+	Name             string `json:"name"`
+	EmployeeImageURI string `json:"employeeImageUri"`
+	Gender           string `json:"gender"`
+	DepartmentID     string `json:"departmentId"`
+}

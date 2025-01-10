@@ -1,6 +1,7 @@
 package department
 
 import (
+	"database/sql"
 	"context"
 	"errors"
 	"fmt"
@@ -41,7 +42,9 @@ func (r *repository) FindOneByID(ctx context.Context, id int) (*models.Departmen
 		id,
 	).Scan(&department.ID, &department.Name, &department.ManagerID, &department.CreatedAt, &department.UpdatedAt)
 
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return nil, errors.New("department not found")
+	} else if err != nil {
 		return nil, err
 	}
 
