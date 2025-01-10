@@ -64,4 +64,5 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	userRouter := v1.Group("user")
 	userRouter.Use(jwtMiddleware)
 	userRouter.GET("/", userHandler.Get)
+	userRouter.PATCH("/:id", userHandler.Update)
 }
