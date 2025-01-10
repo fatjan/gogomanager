@@ -12,7 +12,7 @@ type EmployeeFilter struct {
 	Name      		string 	`db:"name"`
 	IdentityNumber  string	`db:"identity_number"`
 	Gender      	string 	`db:"gender"`
-	DepartmentID	string		`db:"department_id"`
+	DepartmentID	string	`db:"department_id"`
 }
 
 type Repository interface {

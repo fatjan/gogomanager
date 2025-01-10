@@ -51,9 +51,9 @@ func (r *repository) GetAll(ctx context.Context, filter EmployeeFilter, page dto
 		argCount++
 	}
 
-	if filter.DepartmentID != "0" {
+	if filter.DepartmentID != "" {
 		whereClause = append(whereClause, fmt.Sprintf("department_id = $%d", argCount))
-		args = append(args, filter.Gender)
+		args = append(args, filter.DepartmentID)
 		argCount++
 	}
 

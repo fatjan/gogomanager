@@ -19,7 +19,7 @@ type Employee struct {
 type EmployeeRequest struct {
 	IdentityNumber   string     `validate:"required,min=5,max=33"`
 	Name             string     `validate:"required,min=4,max=33"`
-	Gender           GenderType `validate:"oneof=male f emale"`
+	Gender           GenderType `validate:"oneof=male female"`
 	DepartmentID     string     `validate:"required"`
 	EmployeeImageURI string     `validate:"string"`
 	Limit            int
