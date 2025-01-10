@@ -52,32 +52,6 @@ func (uc *useCase) GetAllEmployee(c context.Context, req dto.GetAllEmployeeReque
 	return allEmployee, nil
 }
 
-func (uc *useCase) PostEmployee(c context.Context, employeeRequest *dto.EmployeeRequest, managerId int) (*dto.EmployeeResponse, error) {
-	newEmployee := &models.Employee{
-		Name:             employeeRequest.Name,
-		IdentityNumber:   employeeRequest.IdentityNumber,
-		Gender:           string(employeeRequest.Gender),
-		DepartmentID:     employeeRequest.DepartmentID,
-		EmployeeImageURI: employeeRequest.EmployeeImageURI,
-		ManagerID:        managerId,
-	}
-
-	createdEmployee, err := uc.employeeRepository.Post(c, newEmployee)
-	if err != nil {
-		return nil, err
-	}
-
-	employeeResponse := &dto.EmployeeResponse{
-		Name:             createdEmployee.Name,
-		IdentityNumber:   createdEmployee.IdentityNumber,
-		Gender:           createdEmployee.Gender,
-		DepartmentID:     createdEmployee.DepartmentID,
-		EmployeeImageURI: createdEmployee.EmployeeImageURI,
-	}
-
-	return employeeResponse, nil
-}
-
 func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber string) error {
 	err := uc.employeeRepository.DeleteByIdentityNumber(c, identityNumber)
 	if err != nil {
@@ -143,4 +117,30 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 	}
 
 	return response, nil
+}
+
+func (uc *useCase) PostEmployee(c context.Context, employeeRequest *dto.EmployeeRequest, managerId int) (*dto.EmployeeResponse, error) {
+	newEmployee := &models.Employee{
+		Name:             employeeRequest.Name,
+		IdentityNumber:   employeeRequest.IdentityNumber,
+		Gender:           string(employeeRequest.Gender),
+		DepartmentID:     employeeRequest.DepartmentID,
+		EmployeeImageURI: employeeRequest.EmployeeImageURI,
+		ManagerID:        managerId,
+	}
+
+	createdEmployee, err := uc.employeeRepository.Post(c, newEmployee)
+	if err != nil {
+		return nil, err
+	}
+
+	employeeResponse := &dto.EmployeeResponse{
+		Name:             createdEmployee.Name,
+		IdentityNumber:   createdEmployee.IdentityNumber,
+		Gender:           createdEmployee.Gender,
+		DepartmentID:     createdEmployee.DepartmentID,
+		EmployeeImageURI: createdEmployee.EmployeeImageURI,
+	}
+
+	return employeeResponse, nil
 }
