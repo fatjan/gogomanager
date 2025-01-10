@@ -1,10 +1,13 @@
 package employee
 
 import (
+	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
@@ -72,6 +75,7 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 		log.Println("error query GetAll Employee")
 		return nil, err
 	}
+
 	for rows.Next() {
 		var employee models.Employee
 		err := rows.StructScan(&employee)
@@ -83,6 +87,130 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	}
 
 	return employees, nil
+}
+
+func (r *repository) DeleteByIdentityNumber(ctx context.Context, identityNumber string) error {
+	result, err := r.db.ExecContext(ctx, "DELETE FROM employees WHERE identity_number = $1", identityNumber)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("employee is not found")
+	}
+
+	return nil
+}
+
+func (r *repository) UpdateEmployee(ctx context.Context, identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error) {
+	var employee models.UpdateEmployee
+
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	paramCount := 1
+
+	if request.IdentityNumber != "" {
+		setValues = append(setValues, fmt.Sprintf("identity_number = $%d", paramCount))
+		args = append(args, request.IdentityNumber)
+		paramCount++
+	}
+	if request.Name != "" {
+		setValues = append(setValues, fmt.Sprintf("name = $%d", paramCount))
+		args = append(args, request.Name)
+		paramCount++
+	}
+	if request.EmployeeImageURI != "" {
+		setValues = append(setValues, fmt.Sprintf("employee_image_uri = $%d", paramCount))
+		args = append(args, request.EmployeeImageURI)
+		paramCount++
+	}
+	if request.Gender != "" {
+		setValues = append(setValues, fmt.Sprintf("gender = $%d", paramCount))
+		args = append(args, request.Gender)
+		paramCount++
+	}
+	if request.DepartmentID != 0 {
+		setValues = append(setValues, fmt.Sprintf("department_id = $%d", paramCount))
+		args = append(args, request.DepartmentID)
+		paramCount++
+	}
+
+	setValues = append(setValues, "created_at = current_timestamp", "updated_at = current_timestamp")
+
+	if len(setValues) == 2 {
+		return nil, errors.New("no fields to update")
+	}
+
+	query := fmt.Sprintf(`
+				UPDATE employees
+				SET %s
+				WHERE identity_number = $%d
+				RETURNING 
+						id,
+						identity_number,
+						name,
+						employee_image_uri,
+						gender,
+						department_id`,
+		strings.Join(setValues, ", "),
+		paramCount,
+	)
+
+	args = append(args, identityNumber)
+
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(
+		&employee.ID,
+		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageURI,
+		&employee.Gender,
+		&employee.DepartmentID,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("employee not found")
+		}
+		return nil, err
+	}
+
+	return &employee, nil
+}
+func (r *repository) FindByIdentityNumberWithDepartmentID(ctx context.Context, identityNumber string, department int) (*models.IdentityNumberEmployee, error) {
+	employee := &models.IdentityNumberEmployee{}
+
+	query := `SELECT identity_number, name, employee_image_uri, gender, department_id
+        FROM employees 
+        WHERE identity_number = $1`
+	args := []interface{}{identityNumber}
+
+	if department != 0 {
+		query += ` and department_id = $2`
+		args = append(args, department)
+	}
+
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(
+		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageURI,
+		&employee.Gender,
+		&employee.DepartmentID,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			employee.IdentityNumber = ""
+			return employee, nil
+		}
+		return nil, err
+	}
+
+	return employee, nil
 }
 
 func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
@@ -116,4 +244,27 @@ func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
 	}
 
 	return employee, err
+}
+
+func (r *repository) FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error) {
+	employee := &models.IdentityNumberEmployee{}
+
+	err := r.db.QueryRow(`
+        SELECT identity_number, name, employee_image_uri, gender, department_id
+        FROM employees 
+        WHERE identity_number = $1`,
+		identityNumber,
+	).Scan(
+		&employee.IdentityNumber,
+		&employee.Name,
+		&employee.EmployeeImageURI,
+		&employee.Gender,
+		&employee.DepartmentID,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return employee, nil
 }

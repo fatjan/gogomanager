@@ -1,17 +1,26 @@
 package employee
 
 import (
+	"context"
+	"errors"
+	"strconv"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
+	"github.com/fatjan/gogomanager/internal/repositories/department"
 	"github.com/fatjan/gogomanager/internal/repositories/employee"
 )
 
 type useCase struct {
-	employeeRepository employee.Repository
+	employeeRepository  employee.Repository
+	deparmentRepository department.Repository
 }
 
-func NewUseCase(employeeRepository employee.Repository) UseCase {
-	return &useCase{employeeRepository: employeeRepository}
+func NewUseCase(employeeRepository employee.Repository, departmentRepository department.Repository) UseCase {
+	return &useCase{
+		employeeRepository:  employeeRepository,
+		deparmentRepository: departmentRepository,
+	}
 }
 
 func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.GetAllEmployeeResponse, error) {
@@ -33,6 +42,73 @@ func (uc *useCase) GetAllEmployee(employeeRequest *dto.EmployeeRequest) (*dto.Ge
 	}
 
 	return &dto.GetAllEmployeeResponse{Employees: allEmployee}, nil
+}
+
+func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber string) error {
+	err := uc.employeeRepository.DeleteByIdentityNumber(c, identityNumber)
+	if err != nil {
+		if err.Error() == "employee is not found" {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error) {
+	var departmentID int = 0
+
+	if req.DepartmentID != "" {
+		departmentID, err := strconv.Atoi(req.DepartmentID)
+		if err != nil {
+			return nil, errors.New("invalid department id format")
+		}
+
+		_, err = uc.deparmentRepository.FindOneByID(c, departmentID)
+		if err != nil {
+			if err.Error() == "department not found" {
+				return nil, err
+			}
+		}
+	}
+
+	if req.IdentityNumber != "" {
+		identityNumber = req.IdentityNumber
+	}
+
+	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(c, identityNumber, departmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if employee.IdentityNumber == req.IdentityNumber {
+		return nil, errors.New("duplicate identity number")
+	}
+
+	employees := models.UpdateEmployee{
+		IdentityNumber:   req.IdentityNumber,
+		Name:             req.Name,
+		EmployeeImageURI: req.EmployeeImageURI,
+		Gender:           models.GenderType(req.Gender),
+		DepartmentID:     departmentID,
+	}
+
+	updatedEmployee, err := uc.employeeRepository.UpdateEmployee(c, identityNumber, &employees)
+	if err != nil {
+		return nil, err
+	}
+
+	responseDepartmentID := strconv.Itoa(updatedEmployee.DepartmentID)
+
+	response := &dto.UpdateEmployeeResponse{
+		IdentityNumber:   updatedEmployee.IdentityNumber,
+		Name:             updatedEmployee.Name,
+		EmployeeImageURI: updatedEmployee.EmployeeImageURI,
+		Gender:           string(updatedEmployee.Gender),
+		DepartmentID:     responseDepartmentID,
+	}
+
+	return response, nil
 }
 
 func (uc *useCase) PostEmployee(employeeRequest *dto.EmployeeRequest, managerId int) (*dto.EmployeeResponse, error) {
