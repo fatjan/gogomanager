@@ -1,12 +1,19 @@
 package employee
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
-	"log"
-	"strconv"
+	"github.com/lib/pq"
+)
+
+const (
+	PG_DUPLICATE_ERROR = "23505"
 )
 
 type repository struct {
@@ -20,7 +27,7 @@ func NewEmployeeRepository(db *sqlx.DB) Repository {
 func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Employee, error) {
 	limit := employeeRequest.Limit
 	offset := employeeRequest.Offset
-	
+
 	baseQuery := fmt.Sprintf("SELECT * FROM employees WHERE 1=1")
 	var args []interface{}
 	var argIndex int
@@ -65,7 +72,6 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 		log.Println("error query GetAll Employee")
 		return nil, err
 	}
-	
 	for rows.Next() {
 		var employee models.Employee
 		err := rows.StructScan(&employee)
@@ -77,4 +83,37 @@ func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Emp
 	}
 
 	return employees, nil
+}
+
+func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
+	query := `
+			INSERT INTO employees (
+				identity_number,
+				name,
+				employee_image_uri,
+				gender,
+				department_id,
+				manager_id
+			) VALUES ($1, $2, $3, $4, $5, $6)
+	`
+
+	_, err := r.db.Exec(query,
+		employee.IdentityNumber,
+		employee.Name,
+		employee.EmployeeImageURI,
+		employee.Gender,
+		employee.DepartmentID,
+		employee.ManagerID,
+	)
+
+	if err != nil {
+		pqErr, ok := err.(*pq.Error)
+		if ok && pqErr.Code == PG_DUPLICATE_ERROR {
+			return nil, errors.New("duplicate identity number")
+		}
+
+		return nil, err
+	}
+
+	return employee, err
 }
