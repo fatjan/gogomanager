@@ -93,10 +93,12 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 	}
 
 	// ensure identityNumber being selected for patch exists
-	_, err = uc.employeeRepository.IdentityNumberExists(c, identityNumber, req.ManagerID)
-
+	exists, err := uc.employeeRepository.IdentityNumberExists(c, identityNumber, req.ManagerID)
 	if err != nil {
-		return nil, errors.New("employee not found")
+		return nil, err
+	}
+	if !exists {
+		return nil, errors.New("employee not found") // If exists is false, handle the case of no employee found.
 	}
 
 	employees := models.UpdateEmployee{
