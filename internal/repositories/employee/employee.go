@@ -206,7 +206,8 @@ func (r *repository) UpdateEmployee(ctx context.Context, identityNumber string, 
 
 	return &employee, nil
 }
-func (r *repository) FindByIdentityNumberWithDepartmentID(ctx context.Context, identityNumber string, department int) (*models.IdentityNumberEmployee, error) {
+
+func (r *repository) FindByIdentityNumberWithManagerID(ctx context.Context, identityNumber string, managerId int) (*models.IdentityNumberEmployee, error) {
 	employee := &models.IdentityNumberEmployee{}
 
 	query := `SELECT identity_number, name, employee_image_uri, gender, department_id
@@ -214,10 +215,8 @@ func (r *repository) FindByIdentityNumberWithDepartmentID(ctx context.Context, i
         WHERE identity_number = $1`
 	args := []interface{}{identityNumber}
 
-	if department != 0 {
-		query += ` and department_id = $2`
-		args = append(args, department)
-	}
+	query += ` and manager_id = $2`
+	args = append(args, managerId)
 
 	err := r.db.QueryRowContext(ctx, query, args...).Scan(
 		&employee.IdentityNumber,

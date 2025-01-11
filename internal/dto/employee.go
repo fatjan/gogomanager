@@ -50,6 +50,7 @@ type UpdateEmployeeRequest struct {
 	EmployeeImageURI string     `json:"employeeImageUri"`
 	Gender           GenderType `json:"gender"`
 	DepartmentID     string     `json:"departmentId"`
+	ManagerID		 int		`form:"-"`
 }
 
 type UpdateEmployeeResponse struct {
