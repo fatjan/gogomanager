@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
-	"strconv"
 	"strings"
 
 	"github.com/fatjan/gogomanager/internal/dto"
@@ -27,66 +25,93 @@ func NewEmployeeRepository(db *sqlx.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetAll(employeeRequest *dto.EmployeeRequest) ([]*models.Employee, error) {
-	limit := employeeRequest.Limit
-	offset := employeeRequest.Offset
+func (r *repository) GetAll(ctx context.Context, filter EmployeeFilter, page dto.PaginationRequest) ([]*models.Employee, error) {
+	whereClause := []string{}
+	args := []interface{}{}
+	argCount := 1
 
-	baseQuery := fmt.Sprintf("SELECT * FROM employees WHERE 1=1")
-	var args []interface{}
-	var argIndex int
+	whereClause = append(whereClause, fmt.Sprintf("manager_id = $%d", argCount))
+	args = append(args, filter.ManagerID)
+	argCount++
 
-	idNumber := employeeRequest.IdentityNumber
-	name := employeeRequest.Name
-	gender := employeeRequest.Gender
-	departmentID := employeeRequest.DepartmentID
-
-	if idNumber != "" {
-		baseQuery += " AND identity_number ILIKE $" + strconv.Itoa(argIndex+1)
-		args = append(args, "%"+idNumber+"%")
-		argIndex++
+	if filter.IdentityNumber != "" {
+		whereClause = append(whereClause, fmt.Sprintf("identity_number ILIKE $%d", argCount))
+		args = append(args, "%"+filter.IdentityNumber+"%")
+		argCount++
 	}
 
-	if name != "" {
-		baseQuery += " AND name ILIKE $" + strconv.Itoa(argIndex+1)
-		args = append(args, "%"+name+"%")
-		argIndex++
+	if filter.Name != "" {
+		whereClause = append(whereClause, fmt.Sprintf("name ILIKE $%d", argCount))
+		args = append(args, "%"+filter.Name+"%")
+		argCount++
 	}
 
-	if gender != "" {
-		baseQuery += " AND gender = $" + strconv.Itoa(argIndex+1)
-		args = append(args, gender)
-		argIndex++
+	if filter.Gender != "" {
+		whereClause = append(whereClause, fmt.Sprintf("gender = $%d", argCount))
+		args = append(args, filter.Gender)
+		argCount++
 	}
 
-	if departmentID != "0" {
-		baseQuery += " AND department_id = $" + strconv.Itoa(argIndex+1)
-		args = append(args, departmentID)
-		argIndex++
+	if filter.DepartmentID != "" {
+		whereClause = append(whereClause, fmt.Sprintf("department_id = $%d", argCount))
+		args = append(args, filter.DepartmentID)
+		argCount++
 	}
 
-	baseQuery += " LIMIT $" + strconv.Itoa(argIndex+1) + " OFFSET $" + strconv.Itoa(argIndex+2)
-	args = append(args, limit, offset)
+	whereStr := "WHERE " + strings.Join(whereClause, " AND ")
 
-	employees := make([]*models.Employee, 0)
+	query := fmt.Sprintf(`
+					SELECT id, name, manager_id, identity_number, gender, department_id, employee_image_uri, created_at, updated_at
+					FROM employees
+					%s
+					ORDER BY id
+					LIMIT $%d OFFSET $%d`,
+		whereStr, argCount, argCount+1)
 
-	log.Println(baseQuery)
-	rows, err := r.db.Queryx(baseQuery, args...)
+	args = append(args, page.GetLimit(), page.GetOffset())
+
+	employees := []*models.Employee{}
+	err := r.db.SelectContext(ctx, &employees, query, args...)
 	if err != nil {
-		log.Println("error query GetAll Employee")
-		return nil, err
-	}
-
-	for rows.Next() {
-		var employee models.Employee
-		err := rows.StructScan(&employee)
-		if err != nil {
-			log.Println("error query select")
-			return nil, err
-		}
-		employees = append(employees, &employee)
+		return nil, fmt.Errorf("error get all employees query: %w", err)
 	}
 
 	return employees, nil
+}
+
+func (r *repository) Post(ctx context.Context, employee *models.Employee) (*models.Employee, error) {
+	query := `
+			INSERT INTO employees (
+				identity_number,
+				name,
+				employee_image_uri,
+				gender,
+				department_id,
+				manager_id
+			) VALUES ($1, $2, $3, $4, $5, $6)
+	`
+
+	_, err := r.db.ExecContext(
+		ctx,
+		query,
+		employee.IdentityNumber,
+		employee.Name,
+		employee.EmployeeImageURI,
+		employee.Gender,
+		employee.DepartmentID,
+		employee.ManagerID,
+	)
+
+	if err != nil {
+		pqErr, ok := err.(*pq.Error)
+		if ok && pqErr.Code == PG_DUPLICATE_ERROR {
+			return nil, errors.New("duplicate identity number")
+		}
+
+		return nil, err
+	}
+
+	return employee, err
 }
 
 func (r *repository) DeleteByIdentityNumber(ctx context.Context, identityNumber string) error {
@@ -211,39 +236,6 @@ func (r *repository) FindByIdentityNumberWithDepartmentID(ctx context.Context, i
 	}
 
 	return employee, nil
-}
-
-func (r *repository) Post(employee *models.Employee) (*models.Employee, error) {
-	query := `
-			INSERT INTO employees (
-				identity_number,
-				name,
-				employee_image_uri,
-				gender,
-				department_id,
-				manager_id
-			) VALUES ($1, $2, $3, $4, $5, $6)
-	`
-
-	_, err := r.db.Exec(query,
-		employee.IdentityNumber,
-		employee.Name,
-		employee.EmployeeImageURI,
-		employee.Gender,
-		employee.DepartmentID,
-		employee.ManagerID,
-	)
-
-	if err != nil {
-		pqErr, ok := err.(*pq.Error)
-		if ok && pqErr.Code == PG_DUPLICATE_ERROR {
-			return nil, errors.New("duplicate identity number")
-		}
-
-		return nil, err
-	}
-
-	return employee, err
 }
 
 func (r *repository) FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error) {

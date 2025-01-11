@@ -7,8 +7,8 @@ import (
 )
 
 type UseCase interface {
-	GetAllEmployee(*dto.EmployeeRequest) (*dto.GetAllEmployeeResponse, error)
+	GetAllEmployee(context.Context, dto.GetAllEmployeeRequest) ([]*dto.EmployeeResponse, error)
 	DeleteByIdentityNumber(ctx context.Context, identityNumber string) error
 	UpdateEmployee(ctx context.Context, identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error)
-	PostEmployee(*dto.EmployeeRequest, int) (*dto.EmployeeResponse, error)
+	PostEmployee(context.Context, *dto.EmployeeRequest, int) (*dto.EmployeeResponse, error)
 }

@@ -34,8 +34,14 @@ type EmployeeResponse struct {
 	EmployeeImageURI string `json:"employeeImageUri"`
 }
 
-type GetAllEmployeeResponse struct {
-	Employees []*EmployeeResponse
+type GetAllEmployeeRequest struct {
+	IdentityNumber  string		`form:"identityNumber"`
+	Name      		string 		`form:"name"`
+	Gender      	string 		`form:"gender"`
+	DepartmentID	string 		`form:"departmentId"`
+	ManagerID 		int    		`form:"-"`
+
+	PaginationRequest
 }
 
 type UpdateEmployeeRequest struct {
