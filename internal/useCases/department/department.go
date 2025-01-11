@@ -3,6 +3,7 @@ package department
 import (
 	"context"
 	"fmt"
+	"errors"
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
@@ -63,6 +64,14 @@ func (uc *useCase) DeleteDepartment(c context.Context, departmentID int, manager
 	_, err := uc.departmentRepository.FindOneByID(c, departmentID, managerID)
 	if err != nil {
 		return err
+	}
+
+	departmentHasEmployee, err := uc.departmentRepository.DepartmentHasEmployee(c, departmentID, managerID)
+	if err != nil {
+		return err
+	}
+	if departmentHasEmployee {
+		return errors.New("department still has employees")
 	}
 
 	err = uc.departmentRepository.DeleteByID(c, departmentID, managerID)

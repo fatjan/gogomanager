@@ -114,6 +114,10 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 			statusRes = http.StatusNotFound
 			errorMessageRes = errors.New(fmt.Sprintf("department with id %d not found", departmentIDInt))
 		}
+		if err.Error() == "department still has employees" {
+			statusRes = http.StatusConflict
+			errorMessageRes = errors.New(fmt.Sprintf(err.Error()))
+		}
 
 		delivery.Failed(ginCtx, statusRes, errorMessageRes)
 		return
