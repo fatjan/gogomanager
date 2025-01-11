@@ -171,10 +171,23 @@ func (r *repository) UpdateEmployee(ctx context.Context, identityNumber string, 
 		return nil, errors.New("no fields to update")
 	}
 
+	whereValues := make([]string, 0)
+	whereArgs := make([]interface{}, 0)
+
+	whereValues = append(whereValues, fmt.Sprintf("manager_id = $%d", paramCount))
+	whereArgs = append(whereArgs, request.ManagerID)
+	paramCount++
+
+	whereValues = append(whereValues, fmt.Sprintf("identity_number = $%d", paramCount))
+	whereArgs = append(whereArgs, identityNumber)
+	paramCount++
+	
+	args = append(args, whereArgs...)
+
 	query := fmt.Sprintf(`
 				UPDATE employees
 				SET %s
-				WHERE identity_number = $%d
+				WHERE %s
 				RETURNING 
 						id,
 						identity_number,
@@ -183,11 +196,8 @@ func (r *repository) UpdateEmployee(ctx context.Context, identityNumber string, 
 						gender,
 						department_id`,
 		strings.Join(setValues, ", "),
-		paramCount,
+		strings.Join(whereValues, " AND "),
 	)
-
-	args = append(args, identityNumber)
-
 	err := r.db.QueryRowContext(ctx, query, args...).Scan(
 		&employee.ID,
 		&employee.IdentityNumber,
@@ -235,6 +245,24 @@ func (r *repository) FindByIdentityNumberWithManagerID(ctx context.Context, iden
 	}
 
 	return employee, nil
+}
+
+func (r *repository) IdentityNumberExists(ctx context.Context, identityNumber string, managerId int) (bool, error) {
+	query := `SELECT 1
+        FROM employees 
+        WHERE identity_number = $1
+        AND manager_id = $2`
+
+	var exists int
+	err := r.db.QueryRowContext(ctx, query, identityNumber, managerId).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *repository) FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error) {

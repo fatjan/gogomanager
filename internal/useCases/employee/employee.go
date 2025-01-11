@@ -82,16 +82,21 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 	}
 
 	if req.IdentityNumber != "" {
-		identityNumber = req.IdentityNumber
+		// Check if the identityNumber that the manager wants to update to already exists
+		employeeExist, err := uc.employeeRepository.IdentityNumberExists(c, req.IdentityNumber, req.ManagerID)
+		if err != nil {
+			return nil, err
+		}
+		if employeeExist {
+			return nil, errors.New("duplicate identity number")
+		}
 	}
 
-	employee, err := uc.employeeRepository.FindByIdentityNumberWithManagerID(c, identityNumber, req.ManagerID)
+	// ensure identityNumber being selected for patch exists
+	_, err = uc.employeeRepository.IdentityNumberExists(c, identityNumber, req.ManagerID)
+
 	if err != nil {
-		return nil, err
-	}
-
-	if employee.IdentityNumber == req.IdentityNumber {
-		return nil, errors.New("duplicate identity number")
+		return nil, errors.New("employee not found")
 	}
 
 	employees := models.UpdateEmployee{
@@ -100,6 +105,7 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 		EmployeeImageURI: req.EmployeeImageURI,
 		Gender:           models.GenderType(req.Gender),
 		DepartmentID:     departmentID,
+		ManagerID:     	  req.ManagerID,
 	}
 
 	updatedEmployee, err := uc.employeeRepository.UpdateEmployee(c, identityNumber, &employees)

@@ -22,6 +22,7 @@ type Repository interface {
 	) ([]*models.Employee, error)
 	DeleteByIdentityNumber(ctx context.Context, identityNumber string, managerId int) error
 	UpdateEmployee(ctx context.Context, identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error)
+	IdentityNumberExists(ctx context.Context, identityNumber string, managerId int) (bool, error)
 	FindByIdentityNumberWithManagerID(ctx context.Context, identityNumber string, managerId int) (*models.IdentityNumberEmployee, error)
 	Post(context.Context, *models.Employee) (*models.Employee, error)
 	FindByIdentityNumber(identityNumber string) (*models.IdentityNumberEmployee, error)

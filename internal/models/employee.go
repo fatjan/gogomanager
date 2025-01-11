@@ -28,6 +28,7 @@ type UpdateEmployee struct {
 	EmployeeImageURI string
 	Gender           GenderType
 	DepartmentID     int
+	ManagerID        int 
 }
 
 type IdentityNumberEmployee struct {
