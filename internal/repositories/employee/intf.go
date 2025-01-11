@@ -20,7 +20,7 @@ type Repository interface {
 		EmployeeFilter,
 		dto.PaginationRequest,
 	) ([]*models.Employee, error)
-	DeleteByIdentityNumber(ctx context.Context, identityNumber string) error
+	DeleteByIdentityNumber(ctx context.Context, identityNumber string, managerId int) error
 	UpdateEmployee(ctx context.Context, identityNumber string, request *models.UpdateEmployee) (*models.UpdateEmployee, error)
 	FindByIdentityNumberWithManagerID(ctx context.Context, identityNumber string, managerId int) (*models.IdentityNumberEmployee, error)
 	Post(context.Context, *models.Employee) (*models.Employee, error)

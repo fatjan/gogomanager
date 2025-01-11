@@ -114,8 +114,8 @@ func (r *repository) Post(ctx context.Context, employee *models.Employee) (*mode
 	return employee, err
 }
 
-func (r *repository) DeleteByIdentityNumber(ctx context.Context, identityNumber string) error {
-	result, err := r.db.ExecContext(ctx, "DELETE FROM employees WHERE identity_number = $1", identityNumber)
+func (r *repository) DeleteByIdentityNumber(ctx context.Context, identityNumber string, managerId int) error {
+	result, err := r.db.ExecContext(ctx, "DELETE FROM employees WHERE identity_number = $1 AND manager_id = $2", identityNumber, managerId)
 	if err != nil {
 		return err
 	}

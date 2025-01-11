@@ -52,8 +52,8 @@ func (uc *useCase) GetAllEmployee(c context.Context, req dto.GetAllEmployeeReque
 	return allEmployee, nil
 }
 
-func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber string) error {
-	err := uc.employeeRepository.DeleteByIdentityNumber(c, identityNumber)
+func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber string, managerId int) error {
+	err := uc.employeeRepository.DeleteByIdentityNumber(c, identityNumber, managerId)
 	if err != nil {
 		if err.Error() == "employee is not found" {
 			return err
