@@ -4,13 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
-	"net/http"
-	"strconv"
-
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/useCases/user"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
 )
 
 type UserHandler interface {
@@ -45,14 +43,13 @@ func (r *userHandler) Get(ginCtx *gin.Context) {
 func (r *userHandler) Update(ginCtx *gin.Context) {
 	var userRequest dto.UserPatchRequest
 
-	userID := ginCtx.Param("id")
-
-	userIDInt, err := strconv.Atoi(userID)
-	if err != nil {
-		log.Println(err.Error())
-		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid get id"})
+	managerId, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
 		return
 	}
+
+	userIDInt := managerId.(int)
 
 	if err := ginCtx.ShouldBindJSON(&userRequest); err != nil {
 		log.Println(err.Error())
