@@ -9,6 +9,7 @@ import (
 	authUseCase "github.com/fatjan/gogomanager/internal/useCases/auth"
 	departmentUseCase "github.com/fatjan/gogomanager/internal/useCases/department"
 	employeeUseCase "github.com/fatjan/gogomanager/internal/useCases/employee"
+	fileUseCase "github.com/fatjan/gogomanager/internal/useCases/file"
 
 	userRepository "github.com/fatjan/gogomanager/internal/repositories/user"
 	userUseCase "github.com/fatjan/gogomanager/internal/useCases/user"
@@ -59,4 +60,11 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	userRouter.Use(jwtMiddleware)
 	userRouter.GET("/", userHandler.Get)
 	userRouter.PATCH("/:id", userHandler.Update)
+
+	fileUseCase := fileUseCase.NewUseCase(*cfgData)
+	fileHandler := NewFileHandler(fileUseCase)
+
+	fileRouter := v1.Group("file")
+	fileRouter.Use(jwtMiddleware)
+	fileRouter.POST("/", fileHandler.Post)
 }
