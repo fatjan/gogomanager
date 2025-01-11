@@ -52,7 +52,14 @@ func (r *employeeHandler) Delete(ginCtx *gin.Context) {
 		return
 	}
 
-	err := r.employeeUseCase.DeleteByIdentityNumber(ginCtx.Request.Context(), identityNumber)
+	managerIdStr, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
+		return
+	}
+	managerId := managerIdStr.(int)
+
+	err := r.employeeUseCase.DeleteByIdentityNumber(ginCtx.Request.Context(), identityNumber, managerId)
 	if err != nil {
 		if err.Error() == "employee is not found" {
 			ginCtx.JSON(http.StatusNotFound, gin.H{"error": "identityNumber is not found"})

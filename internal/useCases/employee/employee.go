@@ -52,8 +52,8 @@ func (uc *useCase) GetAllEmployee(c context.Context, req dto.GetAllEmployeeReque
 	return allEmployee, nil
 }
 
-func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber string) error {
-	err := uc.employeeRepository.DeleteByIdentityNumber(c, identityNumber)
+func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber string, managerId int) error {
+	err := uc.employeeRepository.DeleteByIdentityNumber(c, identityNumber, managerId)
 	if err != nil {
 		if err.Error() == "employee is not found" {
 			return err
@@ -73,7 +73,7 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 			return nil, errors.New("invalid department id format")
 		}
 
-		_, err = uc.department.FindOneByID(c, departmentID)
+		_, err = uc.department.FindOneByID(c, departmentID, req.ManagerID)
 		if err != nil {
 			if err.Error() == "department not found" {
 				return nil, err
@@ -82,16 +82,23 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 	}
 
 	if req.IdentityNumber != "" {
-		identityNumber = req.IdentityNumber
+		// Check if the identityNumber that the manager wants to update to already exists
+		employeeExist, err := uc.employeeRepository.IdentityNumberExists(c, req.IdentityNumber, req.ManagerID)
+		if err != nil {
+			return nil, err
+		}
+		if employeeExist {
+			return nil, errors.New("duplicate identity number")
+		}
 	}
 
-	employee, err := uc.employeeRepository.FindByIdentityNumberWithManagerID(c, identityNumber, req.ManagerID)
+	// ensure identityNumber being selected for patch exists
+	exists, err := uc.employeeRepository.IdentityNumberExists(c, identityNumber, req.ManagerID)
 	if err != nil {
 		return nil, err
 	}
-
-	if employee.IdentityNumber == req.IdentityNumber {
-		return nil, errors.New("duplicate identity number")
+	if !exists {
+		return nil, errors.New("employee not found") // If exists is false, handle the case of no employee found.
 	}
 
 	employees := models.UpdateEmployee{
@@ -100,6 +107,7 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 		EmployeeImageURI: req.EmployeeImageURI,
 		Gender:           models.GenderType(req.Gender),
 		DepartmentID:     departmentID,
+		ManagerID:     	  req.ManagerID,
 	}
 
 	updatedEmployee, err := uc.employeeRepository.UpdateEmployee(c, identityNumber, &employees)
