@@ -30,22 +30,22 @@ type AuthResponse struct {
 
 func (d *AuthRequest) ValidatePayloadAuth() error {
 	if d.Email == "" {
-		return exceptions.ErrorRequired("email")
+		return exceptions.ErrorBadRequest
 	}
 	if d.Password == "" {
-		return exceptions.ErrorRequired("password")
+		return exceptions.ErrorBadRequest
 	}
 	if d.Action == "" {
-		return exceptions.ErrorRequired("action")
+		return exceptions.ErrorBadRequest
 	}
 	if !isValidEmail(d.Email) {
-		return exceptions.ErrorInValid("email")
+		return exceptions.ErrorBadRequest
 	}
 	if !isValidPasswordLength(d.Password, 8, 32) {
-		return exceptions.ErrorInValid("email")
+		return exceptions.ErrorBadRequest
 	}
 	if !isValidAction(d.Action) {
-		return exceptions.ErrorInValid("action")
+		return exceptions.ErrorBadRequest
 	}
 	return nil
 }

@@ -9,6 +9,8 @@ func MapToHttpStatusCode(errorMsg error) int {
 		httpStatusCode = http.StatusNotFound
 	case ErrConflict:
 		httpStatusCode = http.StatusConflict
+	case ErrorBadRequest:
+		httpStatusCode = http.StatusBadRequest
 	default:
 		httpStatusCode = http.StatusInternalServerError
 	}
