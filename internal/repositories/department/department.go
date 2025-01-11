@@ -72,8 +72,8 @@ func (r *repository) Update(ctx context.Context, id int, department *models.Depa
 	return nil
 }
 
-func (r *repository) DeleteByID(ctx context.Context, id int) error {
-	result, err := r.db.ExecContext(ctx, "DELETE FROM departments WHERE id = $1", id)
+func (r *repository) DeleteByID(ctx context.Context, id int, managerId int) error {
+	result, err := r.db.ExecContext(ctx, "DELETE FROM departments WHERE id = $1 AND manager_id = $2", id, managerId)
 	if err != nil {
 		return err
 	}

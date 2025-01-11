@@ -65,7 +65,7 @@ func (uc *useCase) DeleteDepartment(c context.Context, departmentID int, manager
 		return err
 	}
 
-	err = uc.departmentRepository.DeleteByID(c, departmentID)
+	err = uc.departmentRepository.DeleteByID(c, departmentID, managerID)
 	if err != nil {
 		return err
 	}
