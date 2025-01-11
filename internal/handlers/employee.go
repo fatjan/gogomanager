@@ -78,6 +78,14 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 		return
 	}
 
+	managerId, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
+		return
+	}
+	id := managerId.(int)
+	req.ManagerID = id
+
 	response, err := r.employeeUseCase.UpdateEmployee(ginCtx.Request.Context(), identityNumber, &req)
 
 	if err != nil {

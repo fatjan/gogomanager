@@ -14,7 +14,7 @@ go run cmd/gogomanager/main.go
 ```
 go install github.com/pressly/goose/v3/cmd/goose@latest
 ```
-2. Going to the folder schema: `internal/database/scema`
+2. Going to the folder schema: `internal/database/schema`
 3. Run the command
 ```
 goose postgres "postgres://user:password@localhost:5432/dbname" up

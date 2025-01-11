@@ -16,8 +16,8 @@ CREATE INDEX IF NOT EXISTS idx_employees_manager_id ON employees(manager_id);
 
 -- COMPOSITE UNIQUE CONSTRAINT
 ALTER TABLE employees 
-ADD CONSTRAINT employees_identity_number_per_department 
-UNIQUE (identity_number, department_id);
+ADD CONSTRAINT employees_identity_number_per_manager
+UNIQUE (identity_number, manager_id);
 
 -- +goose Down
 DROP TABLE IF EXISTS employees;

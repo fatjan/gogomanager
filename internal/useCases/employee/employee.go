@@ -13,13 +13,13 @@ import (
 
 type useCase struct {
 	employeeRepository  employee.Repository
-	deparmentRepository department.Repository
+	department department.Repository
 }
 
 func NewUseCase(employeeRepository employee.Repository, departmentRepository department.Repository) UseCase {
 	return &useCase{
 		employeeRepository:  employeeRepository,
-		deparmentRepository: departmentRepository,
+		department: departmentRepository,
 	}
 }
 
@@ -65,14 +65,15 @@ func (uc *useCase) DeleteByIdentityNumber(c context.Context, identityNumber stri
 
 func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req *dto.UpdateEmployeeRequest) (*dto.UpdateEmployeeResponse, error) {
 	var departmentID int = 0
+	var err error
 
 	if req.DepartmentID != "" {
-		departmentID, err := strconv.Atoi(req.DepartmentID)
+		departmentID, err = strconv.Atoi(req.DepartmentID)
 		if err != nil {
 			return nil, errors.New("invalid department id format")
 		}
 
-		_, err = uc.deparmentRepository.FindOneByID(c, departmentID)
+		_, err = uc.department.FindOneByID(c, departmentID)
 		if err != nil {
 			if err.Error() == "department not found" {
 				return nil, err
@@ -84,7 +85,7 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 		identityNumber = req.IdentityNumber
 	}
 
-	employee, err := uc.employeeRepository.FindByIdentityNumberWithDepartmentID(c, identityNumber, departmentID)
+	employee, err := uc.employeeRepository.FindByIdentityNumberWithManagerID(c, identityNumber, req.ManagerID)
 	if err != nil {
 		return nil, err
 	}
