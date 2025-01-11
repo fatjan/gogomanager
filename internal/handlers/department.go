@@ -60,6 +60,14 @@ func (r *departmentHandler) Update(ginCtx *gin.Context) {
 		return
 	}
 
+	managerId, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
+		return
+	}
+	id := managerId.(int)
+	departmentRequest.ManagerID = id
+
 	if err := ginCtx.BindJSON(&departmentRequest); err != nil {
 		delivery.Failed(ginCtx, http.StatusBadRequest, errors.New("invalid input"))
 		return
@@ -90,7 +98,14 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 		return
 	}
 
-	err = r.departmentUseCase.DeleteDepartment(ginCtx.Request.Context(), departmentIDInt)
+	managerID, exists := ginCtx.Get("manager_id")
+	if !exists {
+		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
+		return
+	}
+	managerIDInt := managerID.(int)
+
+	err = r.departmentUseCase.DeleteDepartment(ginCtx.Request.Context(), departmentIDInt, managerIDInt)
 	if err != nil {
 		statusRes := http.StatusInternalServerError
 		errorMessageRes := errors.New("internal server error")

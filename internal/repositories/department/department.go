@@ -1,7 +1,6 @@
 package department
 
 import (
-	"database/sql"
 	"context"
 	"errors"
 	"fmt"
@@ -34,17 +33,15 @@ func (r *repository) Post(ctx context.Context, department *models.Department) (i
 	return newID, nil
 }
 
-func (r *repository) FindOneByID(ctx context.Context, id int) (*models.Department, error) {
+func (r *repository) FindOneByID(ctx context.Context, id int, managerId int) (*models.Department, error) {
 	department := &models.Department{}
 
 	err := r.db.QueryRowContext(ctx,
-		"SELECT id, name, manager_id, created_at, updated_at FROM departments WHERE id = $1",
-		id,
+		"SELECT id, name, manager_id, created_at, updated_at FROM departments WHERE id = $1 AND manager_id = $2",
+		id, managerId,
 	).Scan(&department.ID, &department.Name, &department.ManagerID, &department.CreatedAt, &department.UpdatedAt)
-
-	if err == sql.ErrNoRows {
-		return nil, errors.New("department not found")
-	} else if err != nil {
+	
+	if err != nil {
 		return nil, err
 	}
 
@@ -53,9 +50,9 @@ func (r *repository) FindOneByID(ctx context.Context, id int) (*models.Departmen
 
 func (r *repository) Update(ctx context.Context, id int, department *models.Department) error {
 	result, err := r.db.ExecContext(ctx,
-		"UPDATE departments SET name = $1, manager_id = $2 WHERE id = $3",
+		"UPDATE departments SET name = $1 WHERE manager_id = $2 AND id = $3",
 		department.Name,
-		1,
+		department.ManagerID,
 		id,
 	)
 	if err != nil {

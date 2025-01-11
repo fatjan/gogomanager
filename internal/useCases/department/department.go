@@ -38,9 +38,10 @@ func (uc *useCase) PostDepartment(c context.Context, departmentRequest *dto.Depa
 func (uc *useCase) UpdateDepartment(c context.Context, departmentID int, departmentRequest *dto.DepartmentRequest) (*dto.DepartmentResponse, error) {
 	newDepartment := &models.Department{
 		Name: departmentRequest.Name,
+		ManagerID: departmentRequest.ManagerID,
 	}
 
-	_, err := uc.departmentRepository.FindOneByID(c, departmentID)
+	_, err := uc.departmentRepository.FindOneByID(c, departmentID, departmentRequest.ManagerID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +59,8 @@ func (uc *useCase) UpdateDepartment(c context.Context, departmentID int, departm
 	return departmentResponse, nil
 }
 
-func (uc *useCase) DeleteDepartment(c context.Context, departmentID int) error {
-	_, err := uc.departmentRepository.FindOneByID(c, departmentID)
+func (uc *useCase) DeleteDepartment(c context.Context, departmentID int, managerID int) error {
+	_, err := uc.departmentRepository.FindOneByID(c, departmentID, managerID)
 	if err != nil {
 		return err
 	}

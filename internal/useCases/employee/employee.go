@@ -73,7 +73,7 @@ func (uc *useCase) UpdateEmployee(c context.Context, identityNumber string, req 
 			return nil, errors.New("invalid department id format")
 		}
 
-		_, err = uc.department.FindOneByID(c, departmentID)
+		_, err = uc.department.FindOneByID(c, departmentID, req.ManagerID)
 		if err != nil {
 			if err.Error() == "department not found" {
 				return nil, err

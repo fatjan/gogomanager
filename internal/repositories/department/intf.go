@@ -15,7 +15,7 @@ type DepartmentFilter struct {
 type Repository interface {
 	Post(context.Context, *models.Department) (int, error)
 	Update(context.Context, int, *models.Department) error
-	FindOneByID(context.Context, int) (*models.Department, error)
+	FindOneByID(context.Context, int, int) (*models.Department, error)
 	DeleteByID(context.Context, int) error
 	FindAllWithFilter(
 		context.Context,
