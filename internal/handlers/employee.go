@@ -7,6 +7,7 @@ import (
 	"github.com/fatjan/gogomanager/internal/useCases/employee"
 	"github.com/fatjan/gogomanager/pkg/delivery"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type EmployeeHandler interface {
@@ -85,6 +86,12 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 		return
 	}
 
+	var validate = validator.New()
+	if err := validate.Struct(req); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "validation error"})
+		return
+	}
+
 	managerId, exists := ginCtx.Get("manager_id")
 	if !exists {
 		ginCtx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid manager id"})
@@ -118,6 +125,12 @@ func (r *employeeHandler) Post(ginCtx *gin.Context) {
 	var employeeRequest dto.EmployeeRequest
 	if err := ginCtx.BindJSON(&employeeRequest); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	var validate = validator.New()
+	if err := validate.Struct(employeeRequest); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
