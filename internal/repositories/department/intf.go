@@ -22,4 +22,5 @@ type Repository interface {
 		DepartmentFilter,
 		dto.PaginationRequest,
 	) ([]*models.Department, error)
+	DepartmentHasEmployee(ctx context.Context, departmentId int, managerId int) (bool, error)
 }

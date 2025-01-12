@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"database/sql"
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/models"
@@ -123,4 +124,22 @@ func (r *repository) FindAllWithFilter(ctx context.Context, filter DepartmentFil
 	}
 
 	return departments, nil
+}
+
+func (r *repository) DepartmentHasEmployee(ctx context.Context, departmentId int, managerId int) (bool, error) {
+	query := `SELECT 1
+        FROM employees 
+        WHERE department_id = $1
+        AND manager_id = $2`
+
+	var exists int
+	err := r.db.QueryRowContext(ctx, query, departmentId, managerId).Scan(&exists)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
