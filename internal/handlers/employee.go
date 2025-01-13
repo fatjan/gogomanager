@@ -150,7 +150,7 @@ func (r *employeeHandler) Post(ginCtx *gin.Context) {
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, employeeResponse)
+	ginCtx.JSON(http.StatusCreated, employeeResponse)
 }
 
 func NewEmployeeHandler(employeeUseCase employee.UseCase) EmployeeHandler {
