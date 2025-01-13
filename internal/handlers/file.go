@@ -1,7 +1,12 @@
 package handlers
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"net/http"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -38,14 +43,20 @@ func (r *fileHandler) Post(ginCtx *gin.Context) {
 		return
 	}
 
-	if !isAllowedFileType(header.Header.Get("Content-Type")) {
-		ginCtx.JSON(400, gin.H{
-			"message": "File type not allowed",
-		})
+	fileName := header.Filename
+	fileType := header.Header.Get("Content-Type")
+	fileContent := new(bytes.Buffer)
+	if _, err := fileContent.ReadFrom(file); err != nil {
+		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file content"})
 		return
 	}
 
-	filename := fmt.Sprintf("%d-%s", time.Now().UnixNano(), header.Filename)
+	if !isAllowedFileType(fileName, fileType, fileContent.Bytes()) {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
+		return
+	}
+
+	filename := fmt.Sprintf("%d-%s", time.Now().UnixNano(), fileName)
 	publicUrl, err := r.fileUseCase.UploadFile(file, filename)
 	if err != nil {
 		ginCtx.JSON(500, gin.H{
@@ -59,12 +70,40 @@ func (r *fileHandler) Post(ginCtx *gin.Context) {
 	})
 }
 
-func isAllowedFileType(fileType string) bool {
-	allowedFileType := []string{"image/jpeg", "image/jpg", "image/png"}
-	for _, v := range allowedFileType {
-		if fileType == v {
-			return true
+func isAllowedFileType(fileName, fileType string, fileContent []byte) bool {
+	allowedMimeTypes := map[string]bool{
+		"image/jpeg":               true,
+		"image/png":                true,
+		"application/octet-stream": true,
+	}
+
+	allowedExtensions := map[string]bool{
+		".jpg":  true,
+		".jpeg": true,
+		".png":  true,
+	}
+
+	if !allowedMimeTypes[fileType] {
+		return false
+	}
+
+	if fileType == "application/octet-stream" {
+		ext := strings.ToLower(filepath.Ext(fileName))
+		if !allowedExtensions[ext] {
+			return false
 		}
 	}
-	return false
+
+	if fileType == "image/jpeg" || fileType == "image/png" {
+		if !isValidImage(fileContent) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isValidImage(content []byte) bool {
+	_, _, err := image.Decode(bytes.NewReader(content))
+	return err == nil
 }
