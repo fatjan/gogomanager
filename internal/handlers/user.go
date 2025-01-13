@@ -41,6 +41,11 @@ func (r *userHandler) Get(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, userResponse)
 }
 func (r *userHandler) Update(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	var userRequest dto.UserPatchRequest
 
 	managerId, exists := ginCtx.Get("manager_id")
@@ -71,6 +76,12 @@ func (r *userHandler) Update(ginCtx *gin.Context) {
 			log.Println(fmt.Sprintf("user with id %d not found", userIDInt))
 			statusRes = http.StatusNotFound
 			errorMessageRes = errors.New(fmt.Sprintf("user with id %d not found", userIDInt))
+		}
+
+		switch err.Error() {
+			case "duplicate email":
+				statusRes = http.StatusConflict
+				errorMessageRes = errors.New("email already exists")
 		}
 
 		ginCtx.JSON(statusRes, gin.H{"error": errorMessageRes.Error()})
