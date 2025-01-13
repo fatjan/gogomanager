@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"bytes"
 	"fmt"
-	"image"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -45,13 +43,7 @@ func (r *fileHandler) Post(ginCtx *gin.Context) {
 
 	fileName := header.Filename
 	fileType := header.Header.Get("Content-Type")
-	fileContent := new(bytes.Buffer)
-	if _, err := fileContent.ReadFrom(file); err != nil {
-		ginCtx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file content"})
-		return
-	}
-
-	if !isAllowedFileType(fileName, fileType, fileContent.Bytes()) {
+	if !isAllowedFileType(fileName, fileType) {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
 		return
 	}
@@ -70,9 +62,10 @@ func (r *fileHandler) Post(ginCtx *gin.Context) {
 	})
 }
 
-func isAllowedFileType(fileName, fileType string, fileContent []byte) bool {
+func isAllowedFileType(fileName, fileType string) bool {
 	allowedMimeTypes := map[string]bool{
 		"image/jpeg":               true,
+		"image/jpg":                true,
 		"image/png":                true,
 		"application/octet-stream": true,
 	}
@@ -94,16 +87,5 @@ func isAllowedFileType(fileName, fileType string, fileContent []byte) bool {
 		}
 	}
 
-	if fileType == "image/jpeg" || fileType == "image/png" {
-		if !isValidImage(fileContent) {
-			return false
-		}
-	}
-
 	return true
-}
-
-func isValidImage(content []byte) bool {
-	_, _, err := image.Decode(bytes.NewReader(content))
-	return err == nil
 }

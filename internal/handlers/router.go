@@ -21,6 +21,10 @@ func SetupRouter(cfgData *config.Config, db *sqlx.DB, r *gin.Engine) {
 	// integrasi jwt
 	jwtMiddleware := jwt_helper.JWTMiddleware(cfgData.JwtKey)
 
+	r.GET("/", func(c *gin.Context) {
+		c.Status(200)
+	})
+
 	v1 := r.Group("v1")
 
 	departmentRepository := departmentRepository.NewDepartmentRepository(db)
