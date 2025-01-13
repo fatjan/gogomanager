@@ -122,6 +122,11 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 }
 
 func (r *employeeHandler) Post(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	var employeeRequest dto.EmployeeRequest
 	if err := ginCtx.BindJSON(&employeeRequest); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
