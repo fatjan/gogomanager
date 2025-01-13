@@ -4,11 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/fatjan/gogomanager/internal/dto"
-	"github.com/fatjan/gogomanager/internal/useCases/user"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+
+	"github.com/fatjan/gogomanager/internal/dto"
+	urlValidator "github.com/fatjan/gogomanager/internal/pkg/validator"
+	"github.com/fatjan/gogomanager/internal/useCases/user"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type UserHandler interface {
@@ -41,6 +44,11 @@ func (r *userHandler) Get(ginCtx *gin.Context) {
 	ginCtx.JSON(http.StatusOK, userResponse)
 }
 func (r *userHandler) Update(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	var userRequest dto.UserPatchRequest
 
 	managerId, exists := ginCtx.Get("manager_id")
@@ -57,7 +65,10 @@ func (r *userHandler) Update(ginCtx *gin.Context) {
 		return
 	}
 
-	if err := userRequest.Validate(); err != nil {
+	var validate = validator.New()
+	_ = validate.RegisterValidation("url", urlValidator.StrictURLValidation)
+
+	if err := validate.Struct(userRequest); err != nil {
 		log.Println(err.Error())
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -71,6 +82,12 @@ func (r *userHandler) Update(ginCtx *gin.Context) {
 			log.Println(fmt.Sprintf("user with id %d not found", userIDInt))
 			statusRes = http.StatusNotFound
 			errorMessageRes = errors.New(fmt.Sprintf("user with id %d not found", userIDInt))
+		}
+
+		switch err.Error() {
+		case "duplicate email":
+			statusRes = http.StatusConflict
+			errorMessageRes = errors.New("email already exists")
 		}
 
 		ginCtx.JSON(statusRes, gin.H{"error": errorMessageRes.Error()})

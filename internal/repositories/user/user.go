@@ -11,6 +11,11 @@ import (
 
 	"github.com/fatjan/gogomanager/internal/models"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+)
+
+const (
+	PG_DUPLICATE_ERROR = "23505"
 )
 
 type repository struct {
@@ -103,6 +108,11 @@ func (r *repository) Update(ctx context.Context, userID int, request *dto.UserPa
 
 	result, err := r.db.ExecContext(ctx, baseQuery, args...)
 	if err != nil {
+		pqErr, ok := err.(*pq.Error)
+		if ok && pqErr.Code == PG_DUPLICATE_ERROR {
+			return fmt.Errorf("duplicate email")
+		}
+		
 		return err
 	}
 

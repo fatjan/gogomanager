@@ -12,6 +12,7 @@ import (
 	"github.com/fatjan/gogomanager/internal/useCases/department"
 	"github.com/fatjan/gogomanager/pkg/delivery"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type DepartmentHandler interface {
@@ -26,9 +27,20 @@ type departmentHandler struct {
 }
 
 func (r *departmentHandler) Post(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	var departmentRequest dto.DepartmentRequest
 	if err := ginCtx.BindJSON(&departmentRequest); err != nil {
 		delivery.Failed(ginCtx, http.StatusBadRequest, errors.New("invalid input"))
+		return
+	}
+
+	var validate = validator.New()
+	if err := validate.Struct(departmentRequest); err != nil {
+		delivery.Failed(ginCtx, http.StatusBadRequest, errors.New("validation error"))
 		return
 	}
 
@@ -50,13 +62,18 @@ func (r *departmentHandler) Post(ginCtx *gin.Context) {
 }
 
 func (r *departmentHandler) Update(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	var departmentRequest dto.DepartmentRequest
 
 	departmentID := ginCtx.Param("id")
 
 	departmentIDInt, err := strconv.Atoi(departmentID)
 	if err != nil {
-		delivery.Failed(ginCtx, http.StatusBadRequest, err)
+		delivery.Failed(ginCtx, http.StatusNotFound, err)
 		return
 	}
 
@@ -70,6 +87,12 @@ func (r *departmentHandler) Update(ginCtx *gin.Context) {
 
 	if err := ginCtx.BindJSON(&departmentRequest); err != nil {
 		delivery.Failed(ginCtx, http.StatusBadRequest, errors.New("invalid input"))
+		return
+	}
+
+	var validate = validator.New()
+	if err := validate.Struct(departmentRequest); err != nil {
+		delivery.Failed(ginCtx, http.StatusBadRequest, errors.New("validation error"))
 		return
 	}
 
@@ -94,7 +117,7 @@ func (r *departmentHandler) Delete(ginCtx *gin.Context) {
 
 	departmentIDInt, err := strconv.Atoi(departmentID)
 	if err != nil {
-		delivery.Failed(ginCtx, http.StatusBadRequest, err)
+		delivery.Failed(ginCtx, http.StatusNotFound, err)
 		return
 	}
 

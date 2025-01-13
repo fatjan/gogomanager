@@ -21,7 +21,7 @@ type EmployeeRequest struct {
 	Name             string     `validate:"required,min=4,max=33"`
 	Gender           GenderType `validate:"oneof=male female"`
 	DepartmentID     string     `validate:"required"`
-	EmployeeImageURI string     `validate:"string"`
+	EmployeeImageURI string     `validate:"url"`
 	Limit            int
 	Offset           int
 }
@@ -35,11 +35,11 @@ type EmployeeResponse struct {
 }
 
 type GetAllEmployeeRequest struct {
-	IdentityNumber  string		`form:"identityNumber"`
-	Name      		string 		`form:"name"`
-	Gender      	string 		`form:"gender"`
-	DepartmentID	string 		`form:"departmentId"`
-	ManagerID 		int    		`form:"-"`
+	IdentityNumber string `form:"identityNumber"`
+	Name           string `form:"name"`
+	Gender         string `form:"gender"`
+	DepartmentID   string `form:"departmentId"`
+	ManagerID      int    `form:"-"`
 
 	PaginationRequest
 }
@@ -47,10 +47,10 @@ type GetAllEmployeeRequest struct {
 type UpdateEmployeeRequest struct {
 	IdentityNumber   string     `json:"identityNumber" validate:"min=5,max=33"`
 	Name             string     `json:"name" validate:"min=5,max=33"`
-	EmployeeImageURI string     `json:"employeeImageUri"`
-	Gender           GenderType `json:"gender"`
-	DepartmentID     string     `json:"departmentId"`
-	ManagerID		 int		`form:"-"`
+	EmployeeImageURI string     `json:"employeeImageUri" validate:"url"`
+	Gender           GenderType `json:"gender" validate:"oneof=male female"`
+	DepartmentID     string     `json:"departmentId" validate:"required"`
+	ManagerID        int        `form:"-"`
 }
 
 type UpdateEmployeeResponse struct {

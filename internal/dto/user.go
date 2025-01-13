@@ -2,9 +2,10 @@ package dto
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"net/url"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 var validate = validator.New()
@@ -47,11 +48,11 @@ type UserRequest struct {
 }
 
 type UserPatchRequest struct {
-	Email           *string `json:"email" validate:"omitempty,email"`
-	Name            *string `json:"name" validate:"omitempty,min=4,max=52"`
-	UserImageUri    *string `json:"userImageUri" validate:"omitempty,uri"`
-	CompanyName     *string `json:"companyName" validate:"omitempty,min=4,max=52"`
-	CompanyImageUri *string `json:"companyImageUri" validate:"omitempty,uri"`
+	Email           *string `json:"email" validate:"email"`
+	Name            *string `json:"name" validate:"min=4,max=52"`
+	UserImageUri    *string `json:"userImageUri" validate:"url"`
+	CompanyName     *string `json:"companyName" validate:"min=4,max=52"`
+	CompanyImageUri *string `json:"companyImageUri" validate:"url"`
 }
 
 // Create a custom URI validation function

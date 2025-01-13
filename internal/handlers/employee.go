@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/fatjan/gogomanager/internal/dto"
+	urlValidator "github.com/fatjan/gogomanager/internal/pkg/validator"
 	"github.com/fatjan/gogomanager/internal/useCases/employee"
 	"github.com/fatjan/gogomanager/pkg/delivery"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type EmployeeHandler interface {
@@ -73,6 +75,11 @@ func (r *employeeHandler) Delete(ginCtx *gin.Context) {
 }
 
 func (r *employeeHandler) Update(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	identityNumber := ginCtx.Param("identityNumber")
 	if identityNumber == "" {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "identity number is required"})
@@ -81,6 +88,13 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 
 	var req dto.UpdateEmployeeRequest
 	if err := ginCtx.ShouldBindJSON(&req); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "validation error"})
+		return
+	}
+
+	var validate = validator.New()
+	_ = validate.RegisterValidation("url", urlValidator.StrictURLValidation)
+	if err := validate.Struct(req); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "validation error"})
 		return
 	}
@@ -115,9 +129,22 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 }
 
 func (r *employeeHandler) Post(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	var employeeRequest dto.EmployeeRequest
 	if err := ginCtx.BindJSON(&employeeRequest); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	var validate = validator.New()
+	_ = validate.RegisterValidation("url", urlValidator.StrictURLValidation)
+
+	if err := validate.Struct(employeeRequest); err != nil {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -132,7 +159,7 @@ func (r *employeeHandler) Post(ginCtx *gin.Context) {
 		return
 	}
 
-	ginCtx.JSON(http.StatusOK, employeeResponse)
+	ginCtx.JSON(http.StatusCreated, employeeResponse)
 }
 
 func NewEmployeeHandler(employeeUseCase employee.UseCase) EmployeeHandler {
