@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/fatjan/gogomanager/internal/dto"
 	"github.com/fatjan/gogomanager/internal/useCases/employee"
@@ -134,6 +135,8 @@ func (r *employeeHandler) Post(ginCtx *gin.Context) {
 	}
 
 	var validate = validator.New()
+	_ = validate.RegisterValidation("url", strictURLValidation)
+
 	if err := validate.Struct(employeeRequest); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -155,4 +158,10 @@ func (r *employeeHandler) Post(ginCtx *gin.Context) {
 
 func NewEmployeeHandler(employeeUseCase employee.UseCase) EmployeeHandler {
 	return &employeeHandler{employeeUseCase: employeeUseCase}
+}
+
+func strictURLValidation(fl validator.FieldLevel) bool {
+	urlPattern := `^(http|https)://([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$`
+	matched, _ := regexp.MatchString(urlPattern, fl.Field().String())
+	return matched
 }

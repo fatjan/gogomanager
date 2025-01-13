@@ -13,7 +13,7 @@ type Employee struct {
 	Name             string     `json:"name"`
 	Gender           GenderType `json:"gender"`
 	DepartmentID     string     `json:"departmentId"`
-	EmployeeImageURI string     `json:"employeeImageUri,omitempty"`
+	EmployeeImageURI string     `json:"employeeImageUri"`
 }
 
 type EmployeeRequest struct {
@@ -21,7 +21,7 @@ type EmployeeRequest struct {
 	Name             string     `validate:"required,min=4,max=33"`
 	Gender           GenderType `validate:"oneof=male female"`
 	DepartmentID     string     `validate:"required"`
-	EmployeeImageURI string
+	EmployeeImageURI string     `validate:"url"`
 	Limit            int
 	Offset           int
 }
