@@ -75,6 +75,11 @@ func (r *employeeHandler) Delete(ginCtx *gin.Context) {
 }
 
 func (r *employeeHandler) Update(ginCtx *gin.Context) {
+	if ginCtx.ContentType() != "application/json" {
+		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid content type"})
+		return
+	}
+
 	identityNumber := ginCtx.Param("identityNumber")
 	if identityNumber == "" {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "identity number is required"})
@@ -88,6 +93,7 @@ func (r *employeeHandler) Update(ginCtx *gin.Context) {
 	}
 
 	var validate = validator.New()
+	_ = validate.RegisterValidation("url", urlValidator.StrictURLValidation)
 	if err := validate.Struct(req); err != nil {
 		ginCtx.JSON(http.StatusBadRequest, gin.H{"error": "validation error"})
 		return

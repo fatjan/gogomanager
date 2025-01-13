@@ -47,9 +47,9 @@ type GetAllEmployeeRequest struct {
 type UpdateEmployeeRequest struct {
 	IdentityNumber   string     `json:"identityNumber" validate:"min=5,max=33"`
 	Name             string     `json:"name" validate:"min=5,max=33"`
-	EmployeeImageURI string     `json:"employeeImageUri"`
-	Gender           GenderType `json:"gender"`
-	DepartmentID     string     `json:"departmentId"`
+	EmployeeImageURI string     `json:"employeeImageUri" validate:"url"`
+	Gender           GenderType `json:"gender" validate:"oneof=male female"`
+	DepartmentID     string     `json:"departmentId" validate:"required"`
 	ManagerID        int        `form:"-"`
 }
 
